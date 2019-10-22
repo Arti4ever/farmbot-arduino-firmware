@@ -381,13 +381,6 @@ void setup()
     StepperControl::getInstance()->moveToCoords(0, 0, 0, 0, 0, 0, true, false, false);
   }
 
-
-  #if defined(FARMDUINO_EXP_V20) || defined(FYSETC_F6)
-    // initialise the motors
-    StepperControl::getInstance()->initTMC2130();
-    StepperControl::getInstance()->loadSettingsTMC2130();
-  #endif
-
   Serial.print("R99 ARDUINO STARTUP COMPLETE\r\n");
 
   //StepperControl::getInstance()->test2();
@@ -395,7 +388,7 @@ void setup()
 
 char commandChar[INCOMING_CMD_BUF_SIZE + 1];
 
-/**/ int cycleCountTest = 0;
+// int cycleCountTest = 0;
 
 // The loop function is called in an endless loop
 void loop()
@@ -580,11 +573,11 @@ void loop()
       CurrentState::getInstance()->storeEndStops();
       CurrentState::getInstance()->printEndStops();
 
-      /**/ cycleCountTest++;
-      /**/ Serial.print("R99 TST Cycle count ");
-      /**/ Serial.print(cycleCountTest);
-      /**/ Serial.print(" ");
-      /**/ CurrentState::getInstance()->printQAndNewLine();
+      // cycleCountTest++;
+      // Serial.print("R99 TST Cycle count ");
+      // Serial.print(cycleCountTest);
+      // Serial.print(" ");
+      // CurrentState::getInstance()->printQAndNewLine();
 
 
       if (debugMessages)
