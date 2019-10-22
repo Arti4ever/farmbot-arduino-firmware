@@ -183,7 +183,7 @@ unsigned int StepperControlAxis::calculateSpeed(long sourcePosition, long curren
   }
 
 
-  unsigned long halfway = ((endPos - staPos) / 2) + staPos;
+  long halfway = ((endPos - staPos) / 2) + staPos;
   //unsigned long halfway = ((destinationPosition - sourcePosition) / 2) + sourcePosition;
 
   // Set the homing speed if the position would be out of bounds

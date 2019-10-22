@@ -43,8 +43,6 @@ int F13Handler::execute(Command *command)
     moveAwayCoord = -moveAwayCoord;
   }
 
-  int stepNr;
-
   // Move to home position. Then 3 times move away and move to home again.
   for (int stepNr = 0; stepNr < 7; stepNr++)
   {

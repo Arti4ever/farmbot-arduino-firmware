@@ -18,7 +18,6 @@ Command::Command(char *commandChar)
 
   char *charBuf = commandChar;
   char *charPointer;
-  bool invalidCommand = false;
 
   charPointer = strtok(charBuf, " \n\r\0");
 
@@ -28,7 +27,6 @@ Command::Command(char *commandChar)
   }
   else
   {
-    invalidCommand = true;
     commandCodeEnum = CODE_UNDEFINED;
     return;
   }

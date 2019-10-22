@@ -226,7 +226,6 @@
 
 #define NSS_PIN 22 
 #define READ_ENA_PIN 49
-#define NULL 0
 
 static const int mdl_spi_encoder_offset = 4;
 enum MdlSpiEncoders

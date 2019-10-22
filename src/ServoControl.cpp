@@ -24,7 +24,7 @@ ServoControl::ServoControl()
 {
 }
 
-int ServoControl::attach()
+void ServoControl::attach()
 {
   servos[0].attach(SERVO_0_PIN);
   servos[1].attach(SERVO_1_PIN);

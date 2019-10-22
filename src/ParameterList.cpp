@@ -19,8 +19,6 @@ ParameterList::ParameterList()
   // so during subsequent boots the values are just loaded from eeprom
   // unless the eeprom is disabled with a parameter
 
-  int paramChangeNr = 0;
-
   int paramVersion = readValueEeprom(0);
   if (paramVersion <= 0)
   {
@@ -135,6 +133,7 @@ int ParameterList::readAllValues()
       readValue(i);
     }
   }
+  return 0;
 }
 
 long ParameterList::getValue(int id)
@@ -231,6 +230,7 @@ int ParameterList::readAllValuesFromEeprom()
       }
     }
   }
+  return 0;
 }
 
 int ParameterList::writeAllValuesToEeprom()
@@ -243,6 +243,7 @@ int ParameterList::writeAllValuesToEeprom()
       writeValueEeprom(i, paramValues[i]);
     }
   }
+  return 0;
 }
 
 // ==== parameter valdation and defaults
@@ -257,6 +258,7 @@ int ParameterList::setAllValuesToDefault()
       loadDefaultValue(i);
     }
   }
+  return 0;
 }
 
 void ParameterList::loadDefaultValue(int id)

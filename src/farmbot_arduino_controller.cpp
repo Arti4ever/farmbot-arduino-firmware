@@ -17,10 +17,9 @@
 bool stepperInit = false;
 bool stepperFlip = false;
 
-static char commandEndChar = 0x0A;
 static GCodeProcessor *gCodeProcessor = new GCodeProcessor();
 
-int reportingPeriod = 5000;
+unsigned long reportingPeriod = 5000;
 unsigned long lastAction;
 unsigned long currentTime;
 unsigned long cycleCounter = 0;
@@ -338,7 +337,7 @@ void setup()
   #if defined(FARMDUINO_EXP_V20)
     TIMSK2 = (TIMSK2 & B11111110) | 0x01; // Enable timer overflow
     TCCR2B = (TCCR2B & B11111000) | 0x01; // Set divider to 1
-    OCR2A = 4; // Set overflow to 4 for total of 64 µs    
+    OCR2A = 4; // Set overflow to 4 for total of 64 ï¿½s    
   #endif
 
   // Initialize the inactivity check

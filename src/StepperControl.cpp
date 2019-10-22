@@ -351,11 +351,6 @@ int StepperControl::moveToCoords(double xDestScaled, double yDestScaled, double 
 
   // Load coordinates into axis class
 
-  long sourcePoint[3] = {0, 0, 0};
-  sourcePoint[0] = CurrentState::getInstance()->getX();
-  sourcePoint[1] = CurrentState::getInstance()->getY();
-  sourcePoint[2] = CurrentState::getInstance()->getZ();
-
   long currentPoint[3] = {0, 0, 0};
   currentPoint[0] = CurrentState::getInstance()->getX();
   currentPoint[1] = CurrentState::getInstance()->getY();
@@ -580,21 +575,21 @@ int StepperControl::moveToCoords(double xDestScaled, double yDestScaled, double 
     storeEndStops();
 
     // Check timeouts
-    if (axisActive[0] == true && ((millis() >= timeStart && millis() - timeStart > timeOut[0] * 1000) || (millis() < timeStart && millis() > timeOut[0] * 1000)))
+    if (axisActive[0] == true && ((millis() >= timeStart && millis() - timeStart > (unsigned long)timeOut[0] * 1000) || (millis() < timeStart && millis() > (unsigned long)timeOut[0] * 1000)))
     {
       serialBuffer += COMM_REPORT_TIMEOUT_X;
       serialBuffer += "\r\n";
       serialBuffer += "R99 timeout X axis\r\n";
       error = ERR_TIMEOUT;
     }
-    if (axisActive[1] == true && ((millis() >= timeStart && millis() - timeStart > timeOut[1] * 1000) || (millis() < timeStart && millis() > timeOut[1] * 1000)))
+    if (axisActive[1] == true && ((millis() >= timeStart && millis() - timeStart > (unsigned long)timeOut[1] * 1000) || (millis() < timeStart && millis() > (unsigned long)timeOut[1] * 1000)))
     {
       serialBuffer += COMM_REPORT_TIMEOUT_Y;
       serialBuffer += "\r\n";
       serialBuffer += "R99 timeout Y axis\r\n";
       error = ERR_TIMEOUT;
     }
-    if (axisActive[2] == true && ((millis() >= timeStart && millis() - timeStart > timeOut[2] * 1000) || (millis() < timeStart && millis() > timeOut[2] * 1000)))
+    if (axisActive[2] == true && ((millis() >= timeStart && millis() - timeStart > (unsigned long)timeOut[2] * 1000) || (millis() < timeStart && millis() > (unsigned long)timeOut[2] * 1000)))
     {
       serialBuffer += COMM_REPORT_TIMEOUT_Z;
       serialBuffer += "\r\n";
@@ -804,7 +799,7 @@ void StepperControl::serialBufferSendNext()
   if (serialBuffer.length() > 0)
   {
 
-    if (serialBufferSending < serialBuffer.length())
+    if (serialBufferSending < (int)serialBuffer.length())
     {
       //Serial.print("-");
       switch (serialBuffer.charAt(serialBufferSending))
@@ -857,11 +852,11 @@ int StepperControl::calibrateAxis(int axis)
 
   float *missedSteps;
   int *missedStepsMax;
-  long *lastPosition;
-  float *encoderStepDecay;
+  // long *lastPosition;
+  // float *encoderStepDecay;
   bool *encoderEnabled;
   int *axisStatus;
-  long *axisStepsPerMm;
+  // long *axisStepsPerMm;
 
   // Prepare for movement
 
@@ -882,11 +877,11 @@ int StepperControl::calibrateAxis(int axis)
     invertEndStops = endStInv[0];
     missedSteps = &motorConsMissedSteps[0];
     missedStepsMax = &motorConsMissedStepsMax[0];
-    lastPosition = &motorLastPosition[0];
-    encoderStepDecay = &motorConsMissedStepsDecay[0];
+    // lastPosition = &motorLastPosition[0];
+    // encoderStepDecay = &motorConsMissedStepsDecay[0];
     encoderEnabled = &motorConsEncoderEnabled[0];
     axisStatus = &axisSubStep[0];
-    axisStepsPerMm = &stepsPerMm[0];
+    // axisStepsPerMm = &stepsPerMm[0];
     break;
   case 1:
     calibAxis = &axisY;
@@ -896,11 +891,11 @@ int StepperControl::calibrateAxis(int axis)
     invertEndStops = endStInv[1];
     missedSteps = &motorConsMissedSteps[1];
     missedStepsMax = &motorConsMissedStepsMax[1];
-    lastPosition = &motorLastPosition[1];
-    encoderStepDecay = &motorConsMissedStepsDecay[1];
+    // lastPosition = &motorLastPosition[1];
+    // encoderStepDecay = &motorConsMissedStepsDecay[1];
     encoderEnabled = &motorConsEncoderEnabled[1];
     axisStatus = &axisSubStep[1];
-    axisStepsPerMm = &stepsPerMm[1];
+    // axisStepsPerMm = &stepsPerMm[1];
     break;
   case 2:
     calibAxis = &axisZ;
@@ -910,11 +905,11 @@ int StepperControl::calibrateAxis(int axis)
     invertEndStops = endStInv[2];
     missedSteps = &motorConsMissedSteps[2];
     missedStepsMax = &motorConsMissedStepsMax[2];
-    lastPosition = &motorLastPosition[2];
-    encoderStepDecay = &motorConsMissedStepsDecay[2];
+    // lastPosition = &motorLastPosition[2];
+    // encoderStepDecay = &motorConsMissedStepsDecay[2];
     encoderEnabled = &motorConsEncoderEnabled[2];
     axisStatus = &axisSubStep[2];
-    axisStepsPerMm = &stepsPerMm[2];
+    // axisStepsPerMm = &stepsPerMm[2];
     break;
   default:
     Serial.print("R99 Calibration error: invalid axis selected\r\n");
