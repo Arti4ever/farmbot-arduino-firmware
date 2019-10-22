@@ -178,6 +178,7 @@ void StepperControl::loadSettings()
 
   loadMotorSettings();
 
+#if defined(STEPPER_HAS_ENCODER)
   // Load encoder settings
 
   loadEncoderSettings();
@@ -193,10 +194,11 @@ void StepperControl::loadSettings()
   encoderX.loadSettings(motorConsEncoderType[0], motorConsEncoderScaling[0], motorConsEncoderInvert[0]);
   encoderY.loadSettings(motorConsEncoderType[1], motorConsEncoderScaling[1], motorConsEncoderInvert[1]);
   encoderZ.loadSettings(motorConsEncoderType[2], motorConsEncoderScaling[2], motorConsEncoderInvert[2]);
+#endif
 
 }
 
-#if defined(FARMDUINO_EXP_V20)
+#if defined(BOARD_HAS_TMC2130_DRIVER) 
   void StepperControl::initTMC2130()
   {
     axisX.initTMC2130();
@@ -658,7 +660,7 @@ int StepperControl::moveToCoords(double xDestScaled, double yDestScaled, double 
 
         case 2:
 
-          #if defined(FARMDUINO_EXP_V20)
+          #if defined(BOARD_HAS_TMC2130_DRIVER)
           serialBuffer += "R89";
           serialBuffer += " X";
           serialBuffer += axisX.getLoad();
@@ -674,19 +676,16 @@ int StepperControl::moveToCoords(double xDestScaled, double yDestScaled, double 
 
       serialMessageNr++;
 
-      #if !defined(FARMDUINO_EXP_V20)
-      if (serialMessageNr > 1)
-      {
-        serialMessageNr = 0;
-      }
-      #endif
-
-      #if defined(FARMDUINO_EXP_V20)
-      
-      if (serialMessageNr > 2)
-      {
-        serialMessageNr = 0;
-      }
+      #if defined(BOARD_HAS_TMC2130_DRIVER)
+        if (serialMessageNr > 2)
+        {
+          serialMessageNr = 0;
+        }
+      #else
+        if (serialMessageNr > 1)
+        {
+          serialMessageNr = 0;
+        }
       #endif
 
       serialBufferSending = 0;
@@ -1235,7 +1234,7 @@ int debugPrintCount = 0;
 // Check encoder to verify the motor is at the right position
 void StepperControl::checkAxisVsEncoder(StepperControlAxis *axis, StepperControlEncoder *encoder, float *missedSteps, long *lastPosition, long *encoderLastPosition, int *encoderUseForPos, float *encoderStepDecay, bool *encoderEnabled)
 {
-#if !defined(FARMDUINO_EXP_V20)
+#if defined(STEPPER_HAS_ENCODER)
   if (*encoderEnabled)
   {
     bool stepMissed = false;
@@ -1303,7 +1302,7 @@ void StepperControl::checkAxisVsEncoder(StepperControlAxis *axis, StepperControl
   }
 #endif
 
-#if defined(FARMDUINO_EXP_V20)
+#if defined(BOARD_HAS_TMC2130_DRIVER)
 
   if (*encoderEnabled) {
     if (axis->stallDetected()) {
@@ -1419,7 +1418,7 @@ void StepperControl::loadMotorSettings()
   axisY.loadMotorSettings(speedMax[1], speedMin[1], speedHome[1], stepsAcc[1], timeOut[1], homeIsUp[1], motorInv[1], endStInv[1], endStInv2[1], MOVEMENT_INTERRUPT_SPEED, motor2Enbl[1], motor2Inv[1], endStEnbl[1], motorStopAtHome[1], motorMaxSize[1], motorStopAtMax[1]);
   axisZ.loadMotorSettings(speedMax[2], speedMin[2], speedHome[2], stepsAcc[2], timeOut[2], homeIsUp[2], motorInv[2], endStInv[2], endStInv2[2], MOVEMENT_INTERRUPT_SPEED, motor2Enbl[2], motor2Inv[2], endStEnbl[2], motorStopAtHome[2], motorMaxSize[2], motorStopAtMax[2]);
 
-#if defined(FARMDUINO_EXP_V20)
+#if defined(BOARD_HAS_TMC2130_DRIVER)
   loadSettingsTMC2130();
 #endif
 
@@ -1571,7 +1570,7 @@ bool StepperControl::endStopsReached()
 void StepperControl::storePosition()
 {
 
-#if !defined(FARMDUINO_EXP_V20)
+#if defined(STEPPER_HAS_ENCODER)
   if (motorConsEncoderEnabled[0])
   {
     CurrentState::getInstance()->setX(encoderX.currentPosition());
@@ -1598,9 +1597,7 @@ void StepperControl::storePosition()
   {
     CurrentState::getInstance()->setZ(axisZ.currentPosition());
   }
-#endif
-
-#if defined(FARMDUINO_EXP_V20)
+#else
   CurrentState::getInstance()->setX(axisX.currentPosition());
   CurrentState::getInstance()->setY(axisY.currentPosition());
   CurrentState::getInstance()->setZ(axisZ.currentPosition());
@@ -1657,6 +1654,7 @@ void StepperControl::handleMovementInterrupt(void)
 
 }
 
+#if defined(STEPPER_HAS_ENCODER)
 void StepperControl::checkEncoders()
 {
   // read encoder pins using the arduino IN registers instead of digital in
@@ -1683,3 +1681,4 @@ void StepperControl::checkEncoders()
     ENC_Z_A_Q_PORT & ENC_Z_A_Q_BYTE,
     ENC_Z_B_Q_PORT & ENC_Z_B_Q_BYTE);
 }
+#endif

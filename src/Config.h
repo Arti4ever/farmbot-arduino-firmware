@@ -252,3 +252,7 @@ enum MdlSpiEncoders
 #if defined(FARMDUINO_EXP_V20) && !defined(SOFTWARE_VERSION)
 #define SOFTWARE_VERSION "6.4.2.E\0"
 #endif
+
+#if defined(FYSETC_F6) && !defined(SOFTWARE_VERSION)
+#define SOFTWARE_VERSION "6.4.2.E\0"
+#endif

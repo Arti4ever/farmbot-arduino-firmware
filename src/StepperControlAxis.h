@@ -17,7 +17,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#if defined(FARMDUINO_EXP_V20)
+#if defined(BOARD_HAS_TMC2130_DRIVER)
   #include <TMC2130Stepper.h>
 #endif
 
@@ -28,7 +28,7 @@ class StepperControlAxis
 public:
   StepperControlAxis();
 
-#if defined(FARMDUINO_EXP_V20)
+#if defined(BOARD_HAS_TMC2130_DRIVER)
   TMC2130Stepper *TMC2130A;
   TMC2130Stepper *TMC2130B;
 #endif
@@ -88,14 +88,14 @@ public:
   char channelLabel;
   bool movementStarted;
 
-#if defined(FARMDUINO_EXP_V20)
+#if defined(BOARD_HAS_TMC2130_DRIVER)
   void initTMC2130();
   void loadSettingsTMC2130(int motorCurrent, int  stallSensitivity, int microSteps);
   bool stallDetected();
   uint16_t getLoad();
 #endif
 
-#if defined(FARMDUINO_EXP_V20)
+#if defined(BOARD_HAS_TMC2130_DRIVER)
   void setMotorStepWriteTMC2130();
   void setMotorStepWriteTMC2130_2();
   void resetMotorStepWriteTMC2130();

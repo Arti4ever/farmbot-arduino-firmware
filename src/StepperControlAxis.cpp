@@ -1,6 +1,6 @@
 #include "StepperControlAxis.h"
 
-#if defined(FARMDUINO_EXP_V20)
+#if defined(BOARD_HAS_TMC2130_DRIVER)
   static TMC2130Stepper TMC2130X = TMC2130Stepper(X_ENABLE_PIN, X_DIR_PIN, X_STEP_PIN, X_CHIP_SELECT);
   static TMC2130Stepper TMC2130Y = TMC2130Stepper(Y_ENABLE_PIN, Y_DIR_PIN, Y_STEP_PIN, Y_CHIP_SELECT);
   static TMC2130Stepper TMC2130Z = TMC2130Stepper(Z_ENABLE_PIN, Z_DIR_PIN, Z_STEP_PIN, Z_CHIP_SELECT);
@@ -53,7 +53,7 @@ void StepperControlAxis::test()
 
 }
 
-#if defined(FARMDUINO_EXP_V20)
+#if defined(BOARD_HAS_TMC2130_DRIVER)
 
 unsigned int StepperControlAxis::getLostSteps()
 {
@@ -590,7 +590,7 @@ void StepperControlAxis::disableMotor()
 void StepperControlAxis::setDirectionUp()
 {
 
-#if !defined(FARMDUINO_EXP_V20)
+#if !defined(BOARD_HAS_TMC2130_DRIVER)
   if (motorMotorInv)
   {
     digitalWrite(pinDirection, LOW);
@@ -610,7 +610,7 @@ void StepperControlAxis::setDirectionUp()
   }
 #endif
 
-#if defined(FARMDUINO_EXP_V20)
+#if defined(BOARD_HAS_TMC2130_DRIVER)
 
   // The TMC2130 uses a command to change direction, not a pin
   if (motorMotorInv)
@@ -637,7 +637,7 @@ void StepperControlAxis::setDirectionUp()
 
 void StepperControlAxis::setDirectionDown()
 {
-  #if !defined(FARMDUINO_EXP_V20)
+  #if !defined(BOARD_HAS_TMC2130_DRIVER)
 
   if (motorMotorInv)
   {
@@ -659,7 +659,7 @@ void StepperControlAxis::setDirectionDown()
 
   #endif
 
-  #if defined(FARMDUINO_EXP_V20)
+  #if defined(BOARD_HAS_TMC2130_DRIVER)
 
   // The TMC2130 uses a command to change direction, not a pin
   if (motorMotorInv)
@@ -940,7 +940,7 @@ void StepperControlAxis::resetMotorStepWrite46()
   PORTL &= B11110111;
 }
 
-#if defined(FARMDUINO_EXP_V20)
+#if defined(BOARD_HAS_TMC2130_DRIVER)
 //// TMC2130 Functions
 
 void StepperControlAxis::setMotorStepWriteTMC2130()

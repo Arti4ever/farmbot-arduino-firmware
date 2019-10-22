@@ -10,7 +10,7 @@
 #include "CurrentState.h"
 #include <SPI.h>
 
-#if !defined(FARMDUINO_EXP_V20)
+#if !defined(FARMDUINO_EXP_V20) && !defined(FYSETC_F6)
 #include "TimerOne.h"
 #endif
 
@@ -57,7 +57,7 @@ unsigned long interruptDurationMax = 0;
 bool interruptBusy = false;
 int interruptSecondTimer = 0;
 
-#if !defined(FARMDUINO_EXP_V20)
+#if !defined(FARMDUINO_EXP_V20) && !defined(FYSETC_F6)
 void interrupt(void)
 {
   if (!debugInterrupt)
@@ -76,7 +76,7 @@ void interrupt(void)
 }
 #endif
 
-#if defined(FARMDUINO_EXP_V20)
+#if defined(FARMDUINO_EXP_V20) || defined(FYSETC_F6)
 ISR(TIMER2_OVF_vect) {
 
   if (interruptBusy == false)
@@ -255,7 +255,7 @@ void setup()
 
   #endif
 
-  #if defined(FARMDUINO_EXP_V20)
+  #if defined(FARMDUINO_EXP_V20) || defined(FYSETC_F6)
 
     // Motor step, directio and pin is setup using the control chip library
     // This board also does not use encoders
@@ -284,6 +284,11 @@ void setup()
     pinMode(LIGHTING_PIN, OUTPUT);
     pinMode(PERIPHERAL_4_PIN, OUTPUT);
     pinMode(PERIPHERAL_5_PIN, OUTPUT);
+
+  #if defined(FYSETC_F6)
+    pinMode(PERIPHERAL_6_PIN, OUTPUT);
+    pinMode(PERIPHERAL_7_PIN, OUTPUT);
+  #endif
 
     pinMode(UTM_C, INPUT_PULLUP);
     pinMode(UTM_D, INPUT_PULLUP);
@@ -328,13 +333,13 @@ void setup()
   // Interrupt management code library written by Paul Stoffregen
   // The default time 100 micro seconds
 
-  #if !defined(FARMDUINO_EXP_V20)
+  #if !defined(FARMDUINO_EXP_V20) && !defined(FYSETC_F6)
     Timer1.attachInterrupt(interrupt);
     Timer1.initialize(MOVEMENT_INTERRUPT_SPEED);
     Timer1.start();
   #endif
 
-  #if defined(FARMDUINO_EXP_V20)
+  #if defined(FARMDUINO_EXP_V20) || defined(FYSETC_F6)
     TIMSK2 = (TIMSK2 & B11111110) | 0x01; // Enable timer overflow
     TCCR2B = (TCCR2B & B11111000) | 0x01; // Set divider to 1
     OCR2A = 4; // Set overflow to 4 for total of 64 �s    
@@ -377,7 +382,7 @@ void setup()
   }
 
 
-  #if defined(FARMDUINO_EXP_V20)
+  #if defined(FARMDUINO_EXP_V20) || defined(FYSETC_F6)
     // initialise the motors
     StepperControl::getInstance()->initTMC2130();
     StepperControl::getInstance()->loadSettingsTMC2130();
