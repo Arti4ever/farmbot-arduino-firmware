@@ -37,3 +37,5 @@ Debug.h
 /__vm
 _build
 bin
+/.pio/build/*
+/.vscode/
