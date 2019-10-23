@@ -10,7 +10,7 @@
 #include "CurrentState.h"
 #include <SPI.h>
 
-#if !defined(FARMDUINO_EXP_V20) && !defined(FYSETC_F6)
+#if !defined(BOARD_HAS_TMC2130_DRIVER)
 #include "TimerOne.h"
 #endif
 
@@ -57,7 +57,7 @@ unsigned long interruptDurationMax = 0;
 bool interruptBusy = false;
 int interruptSecondTimer = 0;
 
-#if !defined(FARMDUINO_EXP_V20) && !defined(FYSETC_F6)
+#if !defined(BOARD_HAS_TMC2130_DRIVER)
 void interrupt(void)
 {
   if (!debugInterrupt)
@@ -74,9 +74,7 @@ void interrupt(void)
     }
   }
 }
-#endif
-
-#if defined(FARMDUINO_EXP_V20) || defined(FYSETC_F6)
+#else
 ISR(TIMER2_OVF_vect) {
 
   if (interruptBusy == false)
@@ -91,88 +89,7 @@ ISR(TIMER2_OVF_vect) {
 //The setup function is called once at startup of the sketch
 void setup()
 {
-  #ifdef RAMPS_V14
-
-    // Setup pin input/output settings
-    pinMode(X_STEP_PIN, OUTPUT);
-    pinMode(X_DIR_PIN, OUTPUT);
-    pinMode(X_ENABLE_PIN, OUTPUT);
-    pinMode(E_STEP_PIN, OUTPUT);
-    pinMode(E_DIR_PIN, OUTPUT);
-    pinMode(E_ENABLE_PIN, OUTPUT);
-    pinMode(X_MIN_PIN, INPUT_PULLUP);
-    pinMode(X_MAX_PIN, INPUT_PULLUP);
-
-    pinMode(X_ENCDR_A, INPUT_PULLUP);
-    pinMode(X_ENCDR_B, INPUT_PULLUP);
-    pinMode(X_ENCDR_A_Q, INPUT_PULLUP);
-    pinMode(X_ENCDR_B_Q, INPUT_PULLUP);
-
-    pinMode(Y_STEP_PIN, OUTPUT);
-    pinMode(Y_DIR_PIN, OUTPUT);
-    pinMode(Y_ENABLE_PIN, OUTPUT);
-    pinMode(Y_MIN_PIN, INPUT_PULLUP);
-    pinMode(Y_MAX_PIN, INPUT_PULLUP);
-
-    pinMode(Y_ENCDR_A, INPUT_PULLUP);
-    pinMode(Y_ENCDR_B, INPUT_PULLUP);
-    pinMode(Y_ENCDR_A_Q, INPUT_PULLUP);
-    pinMode(Y_ENCDR_B_Q, INPUT_PULLUP);
-
-    pinMode(Z_STEP_PIN, OUTPUT);
-    pinMode(Z_DIR_PIN, OUTPUT);
-    pinMode(Z_ENABLE_PIN, OUTPUT);
-    pinMode(Z_MIN_PIN, INPUT_PULLUP);
-    pinMode(Z_MAX_PIN, INPUT_PULLUP);
-
-    pinMode(Z_ENCDR_A, INPUT_PULLUP);
-    pinMode(Z_ENCDR_B, INPUT_PULLUP);
-    pinMode(Z_ENCDR_A_Q, INPUT_PULLUP);
-    pinMode(Z_ENCDR_B_Q, INPUT_PULLUP);
-
-    pinMode(HEATER_0_PIN, OUTPUT);
-    pinMode(HEATER_1_PIN, OUTPUT);
-    pinMode(FAN_PIN, OUTPUT);
-    pinMode(LED_PIN, OUTPUT);
-
-    pinMode(UTM_C, INPUT_PULLUP);
-    pinMode(UTM_D, INPUT_PULLUP);
-    pinMode(UTM_E, INPUT_PULLUP);
-    pinMode(UTM_F, INPUT_PULLUP);
-    pinMode(UTM_G, INPUT_PULLUP);
-    pinMode(UTM_H, INPUT_PULLUP);
-    pinMode(UTM_I, INPUT_PULLUP);
-    pinMode(UTM_J, INPUT_PULLUP);
-    pinMode(UTM_K, INPUT_PULLUP);
-    pinMode(UTM_L, INPUT_PULLUP);
-
-    // Aux 1 pins to safer state
-    pinMode(AUX1_00, INPUT_PULLUP);
-    pinMode(AUX1_01, INPUT_PULLUP);
-    pinMode(AUX1_57, INPUT_PULLUP);
-    pinMode(AUX1_58, INPUT_PULLUP);
-
-    // Aux 3 pins to safer state
-    pinMode(AUX3_49, INPUT_PULLUP);
-    pinMode(AUX3_50, INPUT_PULLUP);
-    pinMode(AUX3_51, INPUT_PULLUP);
-
-    // Aux 4 pins to safer state
-    pinMode(AUX4_43, INPUT_PULLUP);
-    pinMode(AUX4_45, INPUT_PULLUP);
-    pinMode(AUX4_47, INPUT_PULLUP);
-    pinMode(AUX4_32, INPUT_PULLUP);
-
-    pinMode(SERVO_0_PIN, OUTPUT);
-    pinMode(SERVO_1_PIN, OUTPUT);
-    pinMode(SERVO_2_PIN, OUTPUT);
-    pinMode(SERVO_3_PIN, OUTPUT);
-
-  #endif
-
-  #if defined(FARMDUINO_V10) || defined(FARMDUINO_V14)
-
-    // Setup pin input/output settings
+    //setup stepper drivers pins
     pinMode(X_STEP_PIN, OUTPUT);
     pinMode(X_DIR_PIN, OUTPUT);
     pinMode(X_ENABLE_PIN, OUTPUT);
@@ -180,41 +97,39 @@ void setup()
     pinMode(E_STEP_PIN, OUTPUT);
     pinMode(E_DIR_PIN, OUTPUT);
     pinMode(E_ENABLE_PIN, OUTPUT);
-    pinMode(X_MIN_PIN, INPUT_PULLUP);
-    pinMode(X_MAX_PIN, INPUT_PULLUP);
-
-    pinMode(X_ENCDR_A, INPUT_PULLUP);
-    pinMode(X_ENCDR_B, INPUT_PULLUP);
-    //pinMode(X_ENCDR_A_Q, INPUT_PULLUP);
-    //pinMode(X_ENCDR_B_Q, INPUT_PULLUP);
-
+    
     pinMode(Y_STEP_PIN, OUTPUT);
     pinMode(Y_DIR_PIN, OUTPUT);
     pinMode(Y_ENABLE_PIN, OUTPUT);
-    pinMode(Y_MIN_PIN, INPUT_PULLUP);
-    pinMode(Y_MAX_PIN, INPUT_PULLUP);
-
-    pinMode(Y_ENCDR_A, INPUT_PULLUP);
-    pinMode(Y_ENCDR_B, INPUT_PULLUP);
-    //pinMode(Y_ENCDR_A_Q, INPUT_PULLUP);
-    //pinMode(Y_ENCDR_B_Q, INPUT_PULLUP);
 
     pinMode(Z_STEP_PIN, OUTPUT);
     pinMode(Z_DIR_PIN, OUTPUT);
     pinMode(Z_ENABLE_PIN, OUTPUT);
+
+    //setup endstops pins
+    pinMode(X_MIN_PIN, INPUT_PULLUP);
+    pinMode(X_MAX_PIN, INPUT_PULLUP);
+
+    pinMode(Y_MIN_PIN, INPUT_PULLUP);
+    pinMode(Y_MAX_PIN, INPUT_PULLUP);
+
     pinMode(Z_MIN_PIN, INPUT_PULLUP);
     pinMode(Z_MAX_PIN, INPUT_PULLUP);
 
-    pinMode(Z_ENCDR_A, INPUT_PULLUP);
-    pinMode(Z_ENCDR_B, INPUT_PULLUP);
-    //pinMode(Z_ENCDR_A_Q, INPUT_PULLUP);
-    //pinMode(Z_ENCDR_B_Q, INPUT_PULLUP);
-
+    //setup aux stepper drivers pins
     pinMode(AUX_STEP_PIN, OUTPUT);
     pinMode(AUX_DIR_PIN, OUTPUT);
     pinMode(AUX_ENABLE_PIN, OUTPUT);
     digitalWrite(AUX_ENABLE_PIN, HIGH);
 
+    #if defined(BOARD_HAS_TMC2130_DRIVER)
+      pinMode(X_CHIP_SELECT, OUTPUT);
+      pinMode(E_CHIP_SELECT, OUTPUT);
+      pinMode(Y_CHIP_SELECT, OUTPUT);
+      pinMode(Z_CHIP_SELECT, OUTPUT);
+    #endif
+
+    //setup peripherals pins
     pinMode(LED_PIN, OUTPUT);
     pinMode(VACUUM_PIN, OUTPUT);
     pinMode(WATER_PIN, OUTPUT);
@@ -222,86 +137,19 @@ void setup()
     pinMode(PERIPHERAL_4_PIN, OUTPUT);
     pinMode(PERIPHERAL_5_PIN, OUTPUT);
 
-    pinMode(UTM_C, INPUT_PULLUP);
-    pinMode(UTM_D, INPUT_PULLUP);
-    if (UTM_E > 0) { pinMode(UTM_E, INPUT_PULLUP); };
-    if (UTM_F > 0) { pinMode(UTM_F, INPUT_PULLUP); };
-    if (UTM_G > 0) { pinMode(UTM_G, INPUT_PULLUP); };
-    if (UTM_H > 0) { pinMode(UTM_H, INPUT_PULLUP); };
-    if (UTM_I > 0) { pinMode(UTM_I, INPUT_PULLUP); };
-    if (UTM_J > 0) { pinMode(UTM_J, INPUT_PULLUP); };
-    if (UTM_K > 0) { pinMode(UTM_K, INPUT_PULLUP); };
-    if (UTM_L > 0) { pinMode(UTM_L, INPUT_PULLUP); };
-
-    pinMode(SERVO_0_PIN, OUTPUT);
-    pinMode(SERVO_1_PIN, OUTPUT);
-    pinMode(SERVO_2_PIN, OUTPUT);
-    pinMode(SERVO_3_PIN, OUTPUT);
-
+  #ifdef RAMPS_V14
+    // Setup pin input/output settings
+    pinMode(HEATER_0_PIN, OUTPUT);
+    pinMode(HEATER_1_PIN, OUTPUT);
+    pinMode(FAN_PIN, OUTPUT);   
   #endif
-
-  #if defined(FARMDUINO_V14)
-
-    reportingPeriod = 500;
-
-    pinMode(READ_ENA_PIN, INPUT_PULLUP);
-    pinMode(NSS_PIN, OUTPUT);
-    digitalWrite(NSS_PIN, HIGH);
-
-    SPI.setBitOrder(MSBFIRST);
-    SPI.setDataMode(SPI_MODE0);
-    SPI.setClockDivider(SPI_CLOCK_DIV4);
-    SPI.begin();
-
-  #endif
-
-  #if defined(FARMDUINO_EXP_V20) || defined(FYSETC_F6)
-
-    // Motor step, directio and pin is setup using the control chip library
-    // This board also does not use encoders
-  
-    pinMode(X_STEP_PIN, OUTPUT);
-    pinMode(X_DIR_PIN, OUTPUT);
-    pinMode(X_CHIP_SELECT, OUTPUT);
-    pinMode(X_ENABLE_PIN, OUTPUT);
-    pinMode(X_MIN_PIN, INPUT_PULLUP);
-    pinMode(X_MAX_PIN, INPUT_PULLUP);
-
-    pinMode(E_STEP_PIN, OUTPUT);
-    pinMode(E_DIR_PIN, OUTPUT);
-    pinMode(E_CHIP_SELECT, OUTPUT);
-    pinMode(E_ENABLE_PIN, OUTPUT);
-
-    pinMode(Y_STEP_PIN, OUTPUT);
-    pinMode(Y_DIR_PIN, OUTPUT);
-    pinMode(Y_CHIP_SELECT, OUTPUT);
-    pinMode(Y_ENABLE_PIN, OUTPUT);
-    pinMode(Y_MIN_PIN, INPUT_PULLUP);
-    pinMode(Y_MAX_PIN, INPUT_PULLUP);
-
-    pinMode(Z_STEP_PIN, OUTPUT);
-    pinMode(Z_DIR_PIN, OUTPUT);
-    pinMode(Z_CHIP_SELECT, OUTPUT);
-    pinMode(Z_ENABLE_PIN, OUTPUT);
-    pinMode(Z_MIN_PIN, INPUT_PULLUP);
-    pinMode(Z_MAX_PIN, INPUT_PULLUP);
-
-    pinMode(AUX_STEP_PIN, OUTPUT);
-    pinMode(AUX_DIR_PIN, OUTPUT);
-    pinMode(AUX_ENABLE_PIN, OUTPUT);
-
-    pinMode(LED_PIN, OUTPUT);
-    pinMode(VACUUM_PIN, OUTPUT);
-    pinMode(WATER_PIN, OUTPUT);
-    pinMode(LIGHTING_PIN, OUTPUT);
-    pinMode(PERIPHERAL_4_PIN, OUTPUT);
-    pinMode(PERIPHERAL_5_PIN, OUTPUT);
 
   #if defined(FYSETC_F6)
     pinMode(PERIPHERAL_6_PIN, OUTPUT);
     pinMode(PERIPHERAL_7_PIN, OUTPUT);
   #endif
 
+    //setup UTM pins
     pinMode(UTM_C, INPUT_PULLUP);
     pinMode(UTM_D, INPUT_PULLUP);
     if (UTM_E > 0) { pinMode(UTM_E, INPUT_PULLUP); };
@@ -313,13 +161,51 @@ void setup()
     if (UTM_K > 0) { pinMode(UTM_K, INPUT_PULLUP); };
     if (UTM_L > 0) { pinMode(UTM_L, INPUT_PULLUP); };
 
+    //setup servos pins
     pinMode(SERVO_0_PIN, OUTPUT);
     pinMode(SERVO_1_PIN, OUTPUT);
     pinMode(SERVO_2_PIN, OUTPUT);
     pinMode(SERVO_3_PIN, OUTPUT);
 
-  #endif
+    //setup encoders pins
+#if defined(STEPPER_HAS_ENCODER)
+    pinMode(X_ENCDR_A, INPUT_PULLUP);
+    pinMode(X_ENCDR_B, INPUT_PULLUP);
 
+    pinMode(Y_ENCDR_A, INPUT_PULLUP);
+    pinMode(Y_ENCDR_B, INPUT_PULLUP);
+
+    pinMode(Z_ENCDR_A, INPUT_PULLUP);
+    pinMode(Z_ENCDR_B, INPUT_PULLUP);
+
+  #ifdef RAMPS_V14
+    pinMode(X_ENCDR_A_Q, INPUT_PULLUP);
+    pinMode(X_ENCDR_B_Q, INPUT_PULLUP);
+
+    pinMode(Y_ENCDR_A_Q, INPUT_PULLUP);
+    pinMode(Y_ENCDR_B_Q, INPUT_PULLUP);
+
+    pinMode(Z_ENCDR_A_Q, INPUT_PULLUP);
+    pinMode(Z_ENCDR_B_Q, INPUT_PULLUP);
+  #endif
+#endif
+
+#if defined(BOARD_HAS_DYNAMICS_LAB_CHIP)
+
+  reportingPeriod = 500;
+
+  pinMode(READ_ENA_PIN, INPUT_PULLUP);
+  pinMode(NSS_PIN, OUTPUT);
+  digitalWrite(NSS_PIN, HIGH);
+
+  SPI.setBitOrder(MSBFIRST);
+  SPI.setDataMode(SPI_MODE0);
+  SPI.setClockDivider(SPI_CLOCK_DIV4);
+  SPI.begin();
+
+#endif
+
+  //disable steppers
   digitalWrite(X_ENABLE_PIN, HIGH);
   digitalWrite(E_ENABLE_PIN, HIGH);
   digitalWrite(Y_ENABLE_PIN, HIGH);
@@ -345,13 +231,11 @@ void setup()
   // Interrupt management code library written by Paul Stoffregen
   // The default time 100 micro seconds
 
-  #if !defined(FARMDUINO_EXP_V20) && !defined(FYSETC_F6)
+  #if !defined(BOARD_HAS_TMC2130_DRIVER)
     Timer1.attachInterrupt(interrupt);
     Timer1.initialize(MOVEMENT_INTERRUPT_SPEED);
     Timer1.start();
-  #endif
-
-  #if defined(FARMDUINO_EXP_V20) || defined(FYSETC_F6)
+  #else
     TIMSK2 = (TIMSK2 & B11111110) | 0x01; // Enable timer overflow
     TCCR2B = (TCCR2B & B11111000) | 0x01; // Set divider to 1
     OCR2A = 4; // Set overflow to 4 for total of 64 �s    
@@ -423,7 +307,7 @@ void loop()
     StepperControl::getInstance()->handleMovementInterrupt();
   }
 
-  #if defined(FARMDUINO_V14)
+  #if defined(BOARD_HAS_DYNAMICS_LAB_CHIP)
     // Check encoders out of interrupt for farmduino 1.4
     StepperControl::getInstance()->checkEncoders();
   #endif

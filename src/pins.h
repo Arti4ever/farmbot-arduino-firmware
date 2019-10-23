@@ -253,8 +253,9 @@
   // Encoder Z channel B Q (disabled, use LED pin): pin 13, port B7
   #define ENC_Z_B_Q_PORT PINB
   #define ENC_Z_B_Q_BYTE 0x80
-
-
+  
+  #define NSS_PIN 22 
+  #define READ_ENA_PIN 49
 #endif
 
 #if defined(FARMDUINO_EXP_V20)
@@ -442,9 +443,15 @@
   #define PERIPHERAL_7_PIN 46
 
     // Auxiliary motors
-  #define AUX_STEP_PIN 36
-  #define AUX_DIR_PIN 34
-  #define AUX_ENABLE_PIN 30
+  #define AUX_STEP_PIN    36
+  #define AUX_DIR_PIN     34
+  #define AUX_ENABLE_PIN  30
+  #define AUX_CHIP_SELECT 32
+
+  #define AUX_2_STEP_PIN    59
+  #define AUX_2_DIR_PIN     57
+  #define AUX_2_ENABLE_PIN  40
+  #define AUX_2_CHIP_SELECT 42
 
   #define SERVO_0_PIN 13
   #define SERVO_1_PIN 11

@@ -21,7 +21,9 @@ StepperControlEncoder::StepperControlEncoder()
   readChannelB = false;
   readChannelBQ = false;
 
+#if defined(BOARD_HAS_DYNAMICS_LAB_CHIP)
   mdlEncoder = _MDL_X1;
+#endif
 }
 
 void StepperControlEncoder::test()
@@ -69,18 +71,16 @@ void StepperControlEncoder::loadSettings(int encType, long scaling, int invert)
 //  encoderType = 0; // TEVE 2017-04-20 Disabling the differential channels. They take too much time to read.
 }
 
+#if defined(BOARD_HAS_DYNAMICS_LAB_CHIP)
 void StepperControlEncoder::loadMdlEncoderId(MdlSpiEncoders encoder)
 {
   mdlEncoder = encoder;
 }
+#endif
 
 void StepperControlEncoder::setPosition(long newPosition)
 {
-  #if defined(RAMPS_V14) || defined(FARMDUINO_V10)
-    position = newPosition;
-  #endif
-
-  #if defined(FARMDUINO_V14)
+  #if defined(BOARD_HAS_DYNAMICS_LAB_CHIP)
     if (newPosition == 0)
     {
       position = newPosition;
@@ -91,6 +91,8 @@ void StepperControlEncoder::setPosition(long newPosition)
       SPI.transfer(reset_cmd | (mdlEncoder << mdl_spi_encoder_offset));
       digitalWrite(NSS_PIN, HIGH);
     }
+  #elif defined(STEPPER_HAS_ENCODER)
+    position = newPosition;
   #endif
 }
 
@@ -105,7 +107,7 @@ long StepperControlEncoder::currentPosition()
   }
   else
   {
-    #if defined(FARMDUINO_V14)
+    #if defined(BOARD_HAS_DYNAMICS_LAB_CHIP)
       floatScalingFactor = scalingFactor / 40000.0;
       return position * floatScalingFactor * encoderInvert;
     #endif
@@ -121,16 +123,13 @@ long StepperControlEncoder::currentPositionRaw()
 
 void StepperControlEncoder::checkEncoder(bool channelA, bool channelB, bool channelAQ, bool channelBQ)
 {
-  #if defined(RAMPS_V14) || defined(FARMDUINO_V10)
+  #if defined(BOARD_HAS_DYNAMICS_LAB_CHIP)
+    processEncoder();
+  #elif defined(STEPPER_HAS_ENCODER)
     shiftChannels();
     setChannels(channelA, channelB, channelAQ, channelBQ);
     processEncoder();
   #endif
-
-  #if defined(FARMDUINO_V14)
-    processEncoder();
-  #endif
-
 }
 
 
@@ -151,25 +150,8 @@ rotation ----------------------------------------------------->
 
 void StepperControlEncoder::processEncoder()
 {
-
-  #if defined(RAMPS_V14) || defined(FARMDUINO_V10)
-
-    // Detect edges on the A channel when the B channel is high
-    if (curValChannelB == true && prvValChannelA == false && curValChannelA == true)
-    {
-      //delta--;
-      position--;
-    }
-    if (curValChannelB == true && prvValChannelA == true && curValChannelA == false)
-    {
-      //delta++;
-      position++;
-    }
-
-  #endif
-
   // If using farmduino, revision 1.4, use the SPI interface to read from the Motor Dynamics Lab chip
-  #if defined(FARMDUINO_V14)
+  #if defined(BOARD_HAS_DYNAMICS_LAB_CHIP)
     const byte read_cmd = 0x0F;
     int readSize = 4;
     long encoderVal = 0;
@@ -186,14 +168,27 @@ void StepperControlEncoder::processEncoder()
 
     digitalWrite(NSS_PIN, HIGH);
     position = encoderVal;
+
+  #elif defined(STEPPER_HAS_ENCODER)
+
+    // Detect edges on the A channel when the B channel is high
+    if (curValChannelB == true && prvValChannelA == false && curValChannelA == true)
+    {
+      //delta--;
+      position--;
+    }
+    if (curValChannelB == true && prvValChannelA == true && curValChannelA == false)
+    {
+      //delta++;
+      position++;
+    }
   #endif
 
 }
 
 void StepperControlEncoder::readChannels()
 {
-
-#if defined(RAMPS_V14) || defined(FARMDUINO_V10)
+#if !defined(BOARD_HAS_DYNAMICS_LAB_CHIP) && defined(STEPPER_HAS_ENCODER)
   // read the new values from the coder
 
   readChannelA = digitalRead(pinChannelA);

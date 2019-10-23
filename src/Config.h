@@ -224,9 +224,7 @@
 
 //const char SOFTWARE_VERSION[] = "4.0.2\0";
 
-#define NSS_PIN 22 
-#define READ_ENA_PIN 49
-
+#if defined(BOARD_HAS_DYNAMICS_LAB_CHIP)
 static const int mdl_spi_encoder_offset = 4;
 enum MdlSpiEncoders
 {
@@ -235,6 +233,8 @@ enum MdlSpiEncoders
   _MDL_Y = 0b0100,
   _MDL_Z = 0b1000,
 };
+#endif
+
 #endif /* CONFIG_H_ */
 
 #if defined(RAMPS_V14) && !defined(SOFTWARE_VERSION)
@@ -256,3 +256,4 @@ enum MdlSpiEncoders
 #if defined(FYSETC_F6) && !defined(SOFTWARE_VERSION)
 #define SOFTWARE_VERSION "6.4.2.E\0"
 #endif
+

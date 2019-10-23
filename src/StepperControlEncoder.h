@@ -26,8 +26,10 @@ public:
   void loadPinNumbers(int channelA, int channelB, int channelAQ, int channelBQ);
   void loadSettings(int encType, long scaling, int invert);
 
+#if defined(BOARD_HAS_DYNAMICS_LAB_CHIP)
   // Load the id for the motor dynamics lab encoder
   void loadMdlEncoderId(MdlSpiEncoders encoder);
+#endif
 
   void setPosition(long newPosition);
   long currentPosition();
@@ -65,7 +67,9 @@ private:
   int encoderType;
   int encoderInvert;
 
+#if defined(BOARD_HAS_DYNAMICS_LAB_CHIP)
   MdlSpiEncoders mdlEncoder = _MDL_X1;
+#endif
 
 };
 

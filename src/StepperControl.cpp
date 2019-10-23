@@ -456,7 +456,7 @@ int StepperControl::moveToCoords(double xDestScaled, double yDestScaled, double 
   // Let the interrupt handle all the movements
   while ((axisActive[0] || axisActive[1] || axisActive[2]) && !emergencyStop)
   {
-    #if defined(FARMDUINO_V14)
+    #if defined(BOARD_HAS_DYNAMICS_LAB_CHIP)
     checkEncoders();
     #endif
 
@@ -653,7 +653,7 @@ int StepperControl::moveToCoords(double xDestScaled, double yDestScaled, double 
         case 1:
           serialBuffer += CurrentState::getInstance()->getPosition();
           serialBuffer += CurrentState::getInstance()->getQAndNewLine();
-          #if defined(FARMDUINO_V14)
+          #if defined(BOARD_HAS_DYNAMICS_LAB_CHIP)
             getEncoderReport();
           #endif
           break;
@@ -961,7 +961,7 @@ int StepperControl::calibrateAxis(int axis)
   while (!movementDone && error == 0)
   {
 
-    #if defined(FARMDUINO_V14)
+    #if defined(BOARD_HAS_DYNAMICS_LAB_CHIP)
       checkEncoders();
     #endif
 
@@ -1103,7 +1103,7 @@ int StepperControl::calibrateAxis(int axis)
   while (!movementDone && error == 0)
   {
 
-    #if defined(FARMDUINO_V14)
+    #if defined(BOARD_HAS_DYNAMICS_LAB_CHIP)
        checkEncoders();
     #endif
 
@@ -1643,7 +1643,7 @@ void StepperControl::setPositionZ(long pos)
 void StepperControl::handleMovementInterrupt(void)
 {
   // No need to check the encoders for Farmduino 1.4
-  #if defined(RAMPS_V14) || defined(FARMDUINO_V10)
+  #if defined(STEPPER_HAS_ENCODER) && !defined(BOARD_HAS_DYNAMICS_LAB_CHIP)
     checkEncoders();
   #endif
 
