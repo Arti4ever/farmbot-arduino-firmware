@@ -259,17 +259,29 @@ void setup()
 
     // Motor step, directio and pin is setup using the control chip library
     // This board also does not use encoders
-
+  
+    pinMode(X_STEP_PIN, OUTPUT);
+    pinMode(X_DIR_PIN, OUTPUT);
+    pinMode(X_CHIP_SELECT, OUTPUT);
     pinMode(X_ENABLE_PIN, OUTPUT);
     pinMode(X_MIN_PIN, INPUT_PULLUP);
     pinMode(X_MAX_PIN, INPUT_PULLUP);
 
+    pinMode(E_STEP_PIN, OUTPUT);
+    pinMode(E_DIR_PIN, OUTPUT);
+    pinMode(E_CHIP_SELECT, OUTPUT);
     pinMode(E_ENABLE_PIN, OUTPUT);
 
+    pinMode(Y_STEP_PIN, OUTPUT);
+    pinMode(Y_DIR_PIN, OUTPUT);
+    pinMode(Y_CHIP_SELECT, OUTPUT);
     pinMode(Y_ENABLE_PIN, OUTPUT);
     pinMode(Y_MIN_PIN, INPUT_PULLUP);
     pinMode(Y_MAX_PIN, INPUT_PULLUP);
 
+    pinMode(Z_STEP_PIN, OUTPUT);
+    pinMode(Z_DIR_PIN, OUTPUT);
+    pinMode(Z_CHIP_SELECT, OUTPUT);
     pinMode(Z_ENABLE_PIN, OUTPUT);
     pinMode(Z_MIN_PIN, INPUT_PULLUP);
     pinMode(Z_MAX_PIN, INPUT_PULLUP);

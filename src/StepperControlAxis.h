@@ -18,7 +18,7 @@
 #include <stdlib.h>
 
 #if defined(BOARD_HAS_TMC2130_DRIVER)
-  #include <TMC2130Stepper.h>
+#include <TMCStepper.h>
 #endif
 
 
@@ -93,9 +93,7 @@ public:
   void loadSettingsTMC2130(int motorCurrent, int  stallSensitivity, int microSteps);
   bool stallDetected();
   uint16_t getLoad();
-#endif
 
-#if defined(BOARD_HAS_TMC2130_DRIVER)
   void setMotorStepWriteTMC2130();
   void setMotorStepWriteTMC2130_2();
   void resetMotorStepWriteTMC2130();

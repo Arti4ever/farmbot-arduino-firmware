@@ -1,10 +1,10 @@
 #include "StepperControlAxis.h"
 
 #if defined(BOARD_HAS_TMC2130_DRIVER)
-  static TMC2130Stepper TMC2130X = TMC2130Stepper(X_ENABLE_PIN, X_DIR_PIN, X_STEP_PIN, X_CHIP_SELECT);
-  static TMC2130Stepper TMC2130Y = TMC2130Stepper(Y_ENABLE_PIN, Y_DIR_PIN, Y_STEP_PIN, Y_CHIP_SELECT);
-  static TMC2130Stepper TMC2130Z = TMC2130Stepper(Z_ENABLE_PIN, Z_DIR_PIN, Z_STEP_PIN, Z_CHIP_SELECT);
-  static TMC2130Stepper TMC2130E = TMC2130Stepper(E_ENABLE_PIN, E_DIR_PIN, E_STEP_PIN, E_CHIP_SELECT);
+static TMC2130Stepper TMC2130X(X_CHIP_SELECT);
+static TMC2130Stepper TMC2130Y(Y_CHIP_SELECT);
+static TMC2130Stepper TMC2130Z(Z_CHIP_SELECT);
+static TMC2130Stepper TMC2130E(E_CHIP_SELECT);
 #endif
 
 
@@ -120,25 +120,24 @@ void StepperControlAxis::loadSettingsTMC2130(int motorCurrent, int  stallSensiti
 
   TMC2130A->rms_current(motorCurrent);    // Set the required current in mA  
   TMC2130A->microsteps(microSteps);       // Minimum of micro steps needed
-  //TMC2130A->chm(true);                  // Set the chopper mode to classic const. off time
-  TMC2130A->diag1_stall(1);               // Activate stall diagnostics
+  TMC2130A->chm(true);                    // Set the chopper mode to classic const. off time
+  TMC2130A->diag1_stall(true);               // Activate stall diagnostics
   TMC2130A->sgt(stallSensitivity);        // Set stall detection sensitivity. most -64 to +64 least
-  TMC2130A->shaft_dir(0);                 // Set direction
-  TMC2130A->SilentStepStick2130(1200);    // Set stepper current to 1200mA
-  TMC2130A->stealthChop(1);               // Enable extremely quiet stepping
-  TMC2130A->interpolate(1);               // Enable maximum microstepping
+  TMC2130A->shaft(false);                 // Set direction
+  TMC2130A->en_pwm_mode(true);               // Enable extremely quiet stepping
+  TMC2130A->pwm_autoscale(true);
+  //TMC2130A->interpolate(true);               // Enable maximum microstepping
 
   if (channelLabel == 'X')
   {
     TMC2130B->rms_current(motorCurrent);   // Set the required current in mA  
     TMC2130B->microsteps(microSteps);      // Minimum of micro steps needed
-    //TMC2130B->chm(true);                 // Set the chopper mode to classic const. off time
+    TMC2130B->chm(true);                   // Set the chopper mode to classic const. off time
     TMC2130B->diag1_stall(1);              // Activate stall diagnostics
     TMC2130B->sgt(stallSensitivity);       // Set stall detection sensitivity. most -64 to +64 least
-    TMC2130B->shaft_dir(0);                // Set direction
-    TMC2130B->SilentStepStick2130(1200);   // Set stepper current to 1200mA
-    TMC2130B->stealthChop(1);              // Enable extremely quiet stepping
-    TMC2130B->interpolate(1);              // Enable maximum microstepping
+    TMC2130B->shaft(false);                // Set direction
+    TMC2130B->pwm_autoscale(true);              // Enable extremely quiet stepping
+    //TMC2130B->interpolate(true);              // Enable maximum microstepping
   }
 }
 
@@ -488,6 +487,7 @@ void StepperControlAxis::loadMotorSettings(
   motorMaxSize = maxSize;
   motorStopAtMax = stopAtMax;
 
+#if !defined(BOARD_HAS_TMC2130_DRIVER)
   if (pinStep == 54)
   {
     setMotorStepWrite = &StepperControlAxis::setMotorStepWrite54;
@@ -512,6 +512,7 @@ void StepperControlAxis::loadMotorSettings(
     setMotorStepWrite2 = &StepperControlAxis::setMotorStepWrite26;
     resetMotorStepWrite2 = &StepperControlAxis::resetMotorStepWrite26;
   }
+#endif
 
 }
 
@@ -589,8 +590,26 @@ void StepperControlAxis::disableMotor()
 
 void StepperControlAxis::setDirectionUp()
 {
+#if defined(BOARD_HAS_TMC2130_DRIVER)
+  // The TMC2130 uses a command to change direction, not a pin
+  if (motorMotorInv)
+  {
+    TMC2130A->shaft(0);
+  }
+  else
+  {
+    TMC2130A->shaft(1);
+  }
 
-#if !defined(BOARD_HAS_TMC2130_DRIVER)
+  if (motorMotor2Enl && motorMotor2Inv)
+  {
+    TMC2130B->shaft(0);
+  }
+  else
+  {
+    TMC2130B->shaft(1);
+  }
+#else
   if (motorMotorInv)
   {
     digitalWrite(pinDirection, LOW);
@@ -608,37 +627,32 @@ void StepperControlAxis::setDirectionUp()
   {
     digitalWrite(pin2Direction, HIGH);
   }
-#endif
-
-#if defined(BOARD_HAS_TMC2130_DRIVER)
-
-  // The TMC2130 uses a command to change direction, not a pin
-  if (motorMotorInv)
-  {
-    TMC2130A->shaft_dir(0);
-  }
-  else
-  {
-    TMC2130A->shaft_dir(1);
-  }
-
-  if (motorMotor2Enl && motorMotor2Inv)
-  {
-    TMC2130B->shaft_dir(0);
-  }
-  else
-  {
-    TMC2130B->shaft_dir(1);
-  }
-
 #endif
 
 }
 
 void StepperControlAxis::setDirectionDown()
 {
-  #if !defined(BOARD_HAS_TMC2130_DRIVER)
+#if defined(BOARD_HAS_TMC2130_DRIVER)
+  // The TMC2130 uses a command to change direction, not a pin
+  if (motorMotorInv)
+  {
+    TMC2130A->shaft(1);
+  }
+  else
+  {
+    TMC2130A->shaft(0);
+  }
 
+  if (motorMotor2Enl && motorMotor2Inv)
+  {
+    TMC2130B->shaft(1);
+  }
+  else
+  {
+    TMC2130B->shaft(0);
+  }
+#else
   if (motorMotorInv)
   {
     digitalWrite(pinDirection, HIGH);
@@ -656,31 +670,7 @@ void StepperControlAxis::setDirectionDown()
   {
     digitalWrite(pin2Direction, LOW);
   }
-
-  #endif
-
-  #if defined(BOARD_HAS_TMC2130_DRIVER)
-
-  // The TMC2130 uses a command to change direction, not a pin
-  if (motorMotorInv)
-  {
-    TMC2130A->shaft_dir(1);
-  }
-  else
-  {
-    TMC2130A->shaft_dir(0);
-  }
-
-  if (motorMotor2Enl && motorMotor2Inv)
-  {
-    TMC2130B->shaft_dir(1);
-  }
-  else
-  {
-    TMC2130B->shaft_dir(0);
-  }
-
-  #endif
+#endif
 
 }
 
@@ -765,13 +755,13 @@ void StepperControlAxis::setMotorStep()
 {
   stepIsOn = true;
 
-  //digitalWrite(pinStep, HIGH);
-  (this->*setMotorStepWrite)();
+    digitalWrite(pinStep, HIGH);
+  //(this->*setMotorStepWrite)();
 
   if (pin2Enable)
   {
-    (this->*setMotorStepWrite2)();
-    //digitalWrite(pin2Step, HIGH);
+    //(this->*setMotorStepWrite2)();
+    digitalWrite(pin2Step, HIGH);
   }
 }
 
