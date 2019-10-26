@@ -77,12 +77,10 @@ void StepperControlAxis::initTMC2130()
   }
 
   TMC2130A->begin();                      // Initiate pins and registeries
-  //TMC2130A->shaft_dir(0);                 // Set direction
 
   if (channelLabel == 'X')
   {
     TMC2130B->begin();                    // Initiate pins and registeries
-    //TMC2130B->shaft_dir(0);               // Set direction
   }
 
   setMotorStepWrite = &StepperControlAxis::setMotorStepWriteTMC2130;
@@ -601,13 +599,16 @@ void StepperControlAxis::setDirectionUp()
     TMC2130A->shaft(1);
   }
 
-  if (motorMotor2Enl && motorMotor2Inv)
+  if (channelLabel == 'X')
   {
-    TMC2130B->shaft(0);
-  }
-  else
-  {
-    TMC2130B->shaft(1);
+    if (motorMotor2Enl && motorMotor2Inv)
+    {
+      TMC2130B->shaft(0);
+    }
+    else
+    {
+      TMC2130B->shaft(1);
+    }
   }
 #else
   if (motorMotorInv)
@@ -644,13 +645,16 @@ void StepperControlAxis::setDirectionDown()
     TMC2130A->shaft(0);
   }
 
-  if (motorMotor2Enl && motorMotor2Inv)
+  if (channelLabel == 'X')
   {
-    TMC2130B->shaft(1);
-  }
-  else
-  {
-    TMC2130B->shaft(0);
+    if (motorMotor2Enl && motorMotor2Inv)
+    {
+      TMC2130B->shaft(1);
+    }
+    else
+    {
+      TMC2130B->shaft(0);
+    }
   }
 #else
   if (motorMotorInv)
