@@ -127,6 +127,7 @@ void setup()
       pinMode(E_CHIP_SELECT, OUTPUT);
       pinMode(Y_CHIP_SELECT, OUTPUT);
       pinMode(Z_CHIP_SELECT, OUTPUT);
+      SPI.begin();
     #endif
 
     //setup peripherals pins

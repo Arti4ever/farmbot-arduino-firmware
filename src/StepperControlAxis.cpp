@@ -118,24 +118,23 @@ void StepperControlAxis::loadSettingsTMC2130(int motorCurrent, int  stallSensiti
 
   TMC2130A->rms_current(motorCurrent);    // Set the required current in mA  
   TMC2130A->microsteps(microSteps);       // Minimum of micro steps needed
-  TMC2130A->chm(true);                    // Set the chopper mode to classic const. off time
   TMC2130A->diag1_stall(true);               // Activate stall diagnostics
   TMC2130A->sgt(stallSensitivity);        // Set stall detection sensitivity. most -64 to +64 least
   TMC2130A->shaft(false);                 // Set direction
   TMC2130A->en_pwm_mode(true);               // Enable extremely quiet stepping
   TMC2130A->pwm_autoscale(true);
-  //TMC2130A->interpolate(true);               // Enable maximum microstepping
+  TMC2130A->intpol(true);
 
   if (channelLabel == 'X')
   {
     TMC2130B->rms_current(motorCurrent);   // Set the required current in mA  
     TMC2130B->microsteps(microSteps);      // Minimum of micro steps needed
-    TMC2130B->chm(true);                   // Set the chopper mode to classic const. off time
     TMC2130B->diag1_stall(1);              // Activate stall diagnostics
     TMC2130B->sgt(stallSensitivity);       // Set stall detection sensitivity. most -64 to +64 least
     TMC2130B->shaft(false);                // Set direction
     TMC2130B->pwm_autoscale(true);              // Enable extremely quiet stepping
-    //TMC2130B->interpolate(true);              // Enable maximum microstepping
+    TMC2130A->intpol(true);
+
   }
 }
 
@@ -760,11 +759,9 @@ void StepperControlAxis::setMotorStep()
   stepIsOn = true;
 
     digitalWrite(pinStep, HIGH);
-  //(this->*setMotorStepWrite)();
 
   if (pin2Enable)
   {
-    //(this->*setMotorStepWrite2)();
     digitalWrite(pin2Step, HIGH);
   }
 }
@@ -775,12 +772,10 @@ void StepperControlAxis::resetMotorStep()
   movementStepDone = true;
 
   digitalWrite(pinStep, LOW);
-  //(this->*resetMotorStepWrite)();
 
   if (pin2Enable)
   {
     digitalWrite(pin2Step, LOW);
-    //(this->*resetMotorStepWrite2)();
   }
 }
 
