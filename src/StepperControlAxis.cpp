@@ -116,25 +116,41 @@ void StepperControlAxis::loadSettingsTMC2130(int motorCurrent, int  stallSensiti
   Serial.println(" = ");
   */
 
-  TMC2130A->rms_current(motorCurrent);    // Set the required current in mA  
+  // general setup
+  TMC2130A->rms_current(motorCurrent,0.5);// Set the required current in mA  
   TMC2130A->microsteps(microSteps);       // Minimum of micro steps needed
-  TMC2130A->diag1_stall(true);               // Activate stall diagnostics
-  TMC2130A->sgt(stallSensitivity);        // Set stall detection sensitivity. most -64 to +64 least
   TMC2130A->shaft(false);                 // Set direction
-  TMC2130A->en_pwm_mode(true);               // Enable extremely quiet stepping
   TMC2130A->pwm_autoscale(true);
-  TMC2130A->intpol(true);
+  TMC2130A->intpol(true);                 // enable 256 step interpolation
+
+  // enable Stall detection
+  TMC2130A->sgt(stallSensitivity);        // Set stall detection sensitivity. most -64 to +64 least
+  TMC2130A->TCOOLTHRS(0xFFFFF);
+  TMC2130A->en_pwm_mode(false);           // disable stealthchop for stallguard
+  TMC2130A->diag1_stall(true);            // enable Diag1 output (usefull for endstops)
+
+  // setup delay before going to coolstep
+  TMC2130A->iholddelay(10);               
+  TMC2130A->TPOWERDOWN(128); //about 2s
 
   if (channelLabel == 'X')
   {
-    TMC2130B->rms_current(motorCurrent);   // Set the required current in mA  
-    TMC2130B->microsteps(microSteps);      // Minimum of micro steps needed
-    TMC2130B->diag1_stall(1);              // Activate stall diagnostics
-    TMC2130B->sgt(stallSensitivity);       // Set stall detection sensitivity. most -64 to +64 least
-    TMC2130B->shaft(false);                // Set direction
-    TMC2130B->pwm_autoscale(true);              // Enable extremely quiet stepping
-    TMC2130A->intpol(true);
+      // general setup
+      TMC2130B->rms_current(motorCurrent,0.5);// Set the required current in mA  
+      TMC2130B->microsteps(microSteps);       // Minimum of micro steps needed
+      TMC2130B->shaft(false);                 // Set direction
+      TMC2130B->pwm_autoscale(true);
+      TMC2130B->intpol(true);                 // enable 256 step interpolation
 
+      // enable Stall detection
+      TMC2130B->sgt(stallSensitivity);        // Set stall detection sensitivity. most -64 to +64 least
+      TMC2130B->TCOOLTHRS(0xFFFFF);
+      TMC2130B->en_pwm_mode(false);           // disable stealthchop for stallguard
+      TMC2130B->diag1_stall(true);            // enable Diag1 output (usefull for endstops)
+
+      // setup delay before going to coolstep
+      TMC2130B->iholddelay(10);               
+      TMC2130B->TPOWERDOWN(128); //about 2s
   }
 }
 

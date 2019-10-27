@@ -178,11 +178,11 @@ void StepperControl::loadSettings()
 
   loadMotorSettings();
 
-#if defined(STEPPER_HAS_ENCODER)
   // Load encoder settings
 
   loadEncoderSettings();
 
+#if defined(STEPPER_HAS_ENCODER)
   encoderX.loadMdlEncoderId(_MDL_X1);
   encoderY.loadMdlEncoderId(_MDL_Y);
   encoderZ.loadMdlEncoderId(_MDL_Z);
@@ -190,11 +190,11 @@ void StepperControl::loadSettings()
   encoderX.loadPinNumbers(X_ENCDR_A, X_ENCDR_B, X_ENCDR_A_Q, X_ENCDR_B_Q);
   encoderY.loadPinNumbers(Y_ENCDR_A, Y_ENCDR_B, Y_ENCDR_A_Q, Y_ENCDR_B_Q);
   encoderZ.loadPinNumbers(Z_ENCDR_A, Z_ENCDR_B, Z_ENCDR_A_Q, Z_ENCDR_B_Q);
+#endif
 
   encoderX.loadSettings(motorConsEncoderType[0], motorConsEncoderScaling[0], motorConsEncoderInvert[0]);
   encoderY.loadSettings(motorConsEncoderType[1], motorConsEncoderScaling[1], motorConsEncoderInvert[1]);
   encoderZ.loadSettings(motorConsEncoderType[2], motorConsEncoderScaling[2], motorConsEncoderInvert[2]);
-#endif
 
 }
 
@@ -637,10 +637,10 @@ int StepperControl::moveToCoords(double xDestScaled, double yDestScaled, double 
     serialBufferSendNext();
 
     // Periodically send message still active
-    currentMillis++;
+    //currentMillis++;
     serialMessageDelay++;
 
-    if (serialMessageDelay > 300 && serialBuffer.length() == 0 && serialBufferSending == 0)
+    if (serialMessageDelay > 1000 && serialBuffer.length() == 0 && serialBufferSending == 0)
     {
       serialMessageDelay = 0;
 
@@ -1312,12 +1312,13 @@ void StepperControl::checkAxisVsEncoder(StepperControlAxis *axis, StepperControl
     }
     else {
       // Decrease amount of missed steps if there are no missed step
-      if (*missedSteps > 0)
-      {
-        (*missedSteps) -= (*encoderStepDecay);
-      }
+      // if (*missedSteps > 0)
+      // {
+      //   Serial.println("nostall");
+      //   (*missedSteps) -= (*encoderStepDecay);
+      // }
       *lastPosition = axis->currentPosition();
-      encoder->setPosition(axis->currentPosition());
+      //encoder->setPosition(axis->currentPosition());
     }
   }
 #endif
