@@ -83,7 +83,6 @@ private:
   int serialBufferLength = 0;
   int serialBufferSending = 0;
   int serialMessageNr = 0;
-  int serialMessageDelay = 0;
 
   void serialBufferSendNext();
   void serialBufferEmpty();

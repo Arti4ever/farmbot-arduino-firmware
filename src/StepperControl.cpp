@@ -307,11 +307,10 @@ int StepperControl::moveToCoords(double xDestScaled, double yDestScaled, double 
   long yDest = yDestScaled * stepsPerMm[1];
   long zDest = zDestScaled * stepsPerMm[2];
 
-  unsigned long currentMillis = 0;
   unsigned long timeStart = millis();
+  unsigned long serialRepportTimer = millis();
 
   serialMessageNr = 0;
-  serialMessageDelay = 0;
 
   int incomingByte = 0;
   int error = 0;
@@ -427,7 +426,6 @@ int StepperControl::moveToCoords(double xDestScaled, double yDestScaled, double 
   enableMotors();
 
   // Start movement
-
   axisActive[0] = true;
   axisActive[1] = true;
   axisActive[2] = true;
@@ -463,10 +461,6 @@ int StepperControl::moveToCoords(double xDestScaled, double yDestScaled, double 
     checkAxisSubStatus(&axisX, &axisSubStep[0]);
     checkAxisSubStatus(&axisY, &axisSubStep[1]);
     checkAxisSubStatus(&axisZ, &axisSubStep[2]);
-
-    axisX.checkTiming();
-    axisY.checkTiming();
-    axisZ.checkTiming();
 
     if (axisX.isStepDone())
     {
@@ -636,20 +630,16 @@ int StepperControl::moveToCoords(double xDestScaled, double yDestScaled, double 
     // Send the serial buffer one character per cycle to keep motor timing more accuracte
     serialBufferSendNext();
 
-    // Periodically send message still active
-    //currentMillis++;
-    serialMessageDelay++;
-
-    if (serialMessageDelay > 1000 && serialBuffer.length() == 0 && serialBufferSending == 0)
+    // Periodically (250 ms) send message still active
+    if (((millis() - serialRepportTimer) > 250) && (serialBuffer.length() == 0))
     {
-      serialMessageDelay = 0;
-
       switch(serialMessageNr)
       {
         case 0:
           serialBuffer += COMM_REPORT_CMD_BUSY;
           serialBuffer += CurrentState::getInstance()->getQAndNewLine();
           break;
+
         case 1:
           serialBuffer += CurrentState::getInstance()->getPosition();
           serialBuffer += CurrentState::getInstance()->getQAndNewLine();
@@ -659,21 +649,18 @@ int StepperControl::moveToCoords(double xDestScaled, double yDestScaled, double 
           break;
 
         case 2:
-
           #if defined(BOARD_HAS_TMC2130_DRIVER)
-          serialBuffer += "R89";
-          serialBuffer += " X";
-          serialBuffer += axisX.getLoad();
-          serialBuffer += " Y";
-          serialBuffer += axisY.getLoad();
-          serialBuffer += " Z";
-          serialBuffer += axisZ.getLoad();
-          serialBuffer += CurrentState::getInstance()->getQAndNewLine();
+            serialBuffer += "R89";
+            serialBuffer += " X";
+            serialBuffer += axisX.getLoad();
+            serialBuffer += " Y";
+            serialBuffer += axisY.getLoad();
+            serialBuffer += " Z";
+            serialBuffer += axisZ.getLoad();
+            serialBuffer += CurrentState::getInstance()->getQAndNewLine();
           #endif
           break;
-
       }
-
       serialMessageNr++;
 
       #if defined(BOARD_HAS_TMC2130_DRIVER)
@@ -687,12 +674,9 @@ int StepperControl::moveToCoords(double xDestScaled, double yDestScaled, double 
           serialMessageNr = 0;
         }
       #endif
-
-      serialBufferSending = 0;
       
-      if (debugMessages /*&& debugInterrupt*/)
+      if (debugMessages)
       {
-
 				Serial.print("R99");
 				Serial.print(" missed step ");
 				Serial.print(motorConsMissedSteps[1]);
@@ -702,6 +686,8 @@ int StepperControl::moveToCoords(double xDestScaled, double yDestScaled, double 
 				Serial.print(axisY.currentPosition());
 				Serial.print("\r\n");
       }
+
+      serialRepportTimer = millis();
     }
   }
 
@@ -765,8 +751,6 @@ int StepperControl::moveToCoords(double xDestScaled, double yDestScaled, double 
   reportStatus(&axisY, axisSubStep[1]);
   reportStatus(&axisZ, axisSubStep[2]);
 
-  disableMotors();
-
   if (emergencyStop)
   {
     CurrentState::getInstance()->setEmergencyStop();
@@ -776,7 +760,6 @@ int StepperControl::moveToCoords(double xDestScaled, double yDestScaled, double 
   Serial.print("R99 error ");
   Serial.print(error);
   Serial.print("\r\n");
-
 
   // Return error
   CurrentState::getInstance()->setLastError(error);
@@ -797,7 +780,6 @@ void StepperControl::serialBufferSendNext()
   // Send the next char in the serialBuffer
   if (serialBuffer.length() > 0)
   {
-
     if (serialBufferSending < (int)serialBuffer.length())
     {
       //Serial.print("-");
@@ -812,7 +794,6 @@ void StepperControl::serialBufferSendNext()
         Serial.print(serialBuffer.charAt(serialBufferSending));
         break;
       }
-
       serialBufferSending++;
     }
     else
@@ -821,6 +802,10 @@ void StepperControl::serialBufferSendNext()
       serialBuffer = "";
       serialBufferSending = 0;
     }
+  }
+  else
+  {
+    serialBufferSending = 0;
   }
 }
 
@@ -1653,6 +1638,10 @@ void StepperControl::handleMovementInterrupt(void)
   axisX.incrementTick();
   axisY.incrementTick();
   axisZ.incrementTick();
+
+  axisX.checkTiming();
+  axisY.checkTiming();
+  axisZ.checkTiming();
 
 }
 
