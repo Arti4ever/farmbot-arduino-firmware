@@ -538,22 +538,25 @@ int StepperControl::moveToCoords(double xDestScaled, double yDestScaled, double 
       }
     }
 
-    if (axisX.endStopAxisReached(false))
+    if (axisX.endStopAxisReached(axisX.movingUp()))
     {
       axisX.setCurrentPosition(0);
       encoderX.setPosition(0);
+      axisX.deactivateAxis();
     }
 
-    if (axisY.endStopAxisReached(false))
+    if (axisY.endStopAxisReached(axisY.movingUp()))
     {
       axisY.setCurrentPosition(0);
       encoderY.setPosition(0);
+      axisY.deactivateAxis();
     }
 
-    if (axisZ.endStopAxisReached(false))
+    if (axisZ.endStopAxisReached(axisZ.movingUp()))
     {
       axisZ.setCurrentPosition(0);
       encoderZ.setPosition(0);
+      axisZ.deactivateAxis();
     }
 
     axisActive[0] = axisX.isAxisActive();
@@ -571,21 +574,21 @@ int StepperControl::moveToCoords(double xDestScaled, double yDestScaled, double 
     storeEndStops();
 
     // Check timeouts
-    if (axisActive[0] == true && ((millis() >= timeStart && millis() - timeStart > (unsigned long)timeOut[0] * 1000) || (millis() < timeStart && millis() > (unsigned long)timeOut[0] * 1000)))
+    if (axisActive[0] == true && ((millis() - timeStart) > (unsigned long)(timeOut[0] * 1000)))
     {
       serialBuffer += COMM_REPORT_TIMEOUT_X;
       serialBuffer += "\r\n";
       serialBuffer += "R99 timeout X axis\r\n";
       error = ERR_TIMEOUT;
     }
-    if (axisActive[1] == true && ((millis() >= timeStart && millis() - timeStart > (unsigned long)timeOut[1] * 1000) || (millis() < timeStart && millis() > (unsigned long)timeOut[1] * 1000)))
+    if (axisActive[1] == true && ((millis() - timeStart) > (unsigned long)(timeOut[1] * 1000)))
     {
       serialBuffer += COMM_REPORT_TIMEOUT_Y;
       serialBuffer += "\r\n";
       serialBuffer += "R99 timeout Y axis\r\n";
       error = ERR_TIMEOUT;
     }
-    if (axisActive[2] == true && ((millis() >= timeStart && millis() - timeStart > (unsigned long)timeOut[2] * 1000) || (millis() < timeStart && millis() > (unsigned long)timeOut[2] * 1000)))
+    if (axisActive[2] == true && ((millis() - timeStart) > (unsigned long)(timeOut[2] * 1000)))
     {
       serialBuffer += COMM_REPORT_TIMEOUT_Z;
       serialBuffer += "\r\n";
@@ -1299,11 +1302,10 @@ void StepperControl::checkAxisVsEncoder(StepperControlAxis *axis, StepperControl
       // Decrease amount of missed steps if there are no missed step
       // if (*missedSteps > 0)
       // {
-      //   Serial.println("nostall");
       //   (*missedSteps) -= (*encoderStepDecay);
       // }
       *lastPosition = axis->currentPosition();
-      //encoder->setPosition(axis->currentPosition());
+      encoder->setPosition(axis->currentPosition());
     }
   }
 #endif
