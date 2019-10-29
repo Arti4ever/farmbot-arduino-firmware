@@ -41,18 +41,22 @@ int F11Handler::execute(Command *command)
     moveAwayCoord = -moveAwayCoord;
   }
 
+  // save current position
+  double yPos = (double)CurrentState::getInstance()->getY() / ParameterList::getInstance()->getValue(MOVEMENT_STEP_PER_MM_Y);
+  double zPos = (double)CurrentState::getInstance()->getZ() / ParameterList::getInstance()->getValue(MOVEMENT_STEP_PER_MM_Z);
+
   // Move to home position. Then 3 times move away and move to home again.
   for (int stepNr = 0; stepNr < 7; stepNr++)
   {
     switch (stepNr)
     {
-      case 0: StepperControl::getInstance()->moveToCoords(0, 0, 0, 0, 0, 0, true, false, false); break;
-      case 1: StepperControl::getInstance()->moveToCoords(moveAwayCoord, 0, 0, 0, 0, 0, false, false, false); break;
-      case 2: StepperControl::getInstance()->moveToCoords(0, 0, 0, 0, 0, 0, true, false, false); break;
-      case 3: StepperControl::getInstance()->moveToCoords(moveAwayCoord, 0, 0, 0, 0, 0, false, false, false); break;
-      case 4: StepperControl::getInstance()->moveToCoords(0, 0, 0, 0, 0, 0, true, false, false); break;
-      case 5: StepperControl::getInstance()->moveToCoords(moveAwayCoord, 0, 0, 0, 0, 0, false, false, false); break;
-      case 6: StepperControl::getInstance()->moveToCoords(0, 0, 0, 0, 0, 0, true, false, false); break;
+      case 0: StepperControl::getInstance()->moveToCoords(0, yPos, zPos, 0, 0, 0, true, false, false); break;
+      case 1: StepperControl::getInstance()->moveToCoords(moveAwayCoord, yPos, zPos, 0, 0, 0, false, false, false); break;
+      case 2: StepperControl::getInstance()->moveToCoords(0, yPos, zPos, 0, 0, 0, true, false, false); break;
+      case 3: StepperControl::getInstance()->moveToCoords(moveAwayCoord, yPos, zPos, 0, 0, 0, false, false, false); break;
+      case 4: StepperControl::getInstance()->moveToCoords(0, yPos, zPos, 0, 0, 0, true, false, false); break;
+      case 5: StepperControl::getInstance()->moveToCoords(moveAwayCoord, yPos, zPos, 0, 0, 0, false, false, false); break;
+      case 6: StepperControl::getInstance()->moveToCoords(0, yPos, zPos, 0, 0, 0, true, false, false); break;
     }
 
     execution = CurrentState::getInstance()->getLastError();
