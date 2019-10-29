@@ -21,12 +21,9 @@ static GCodeProcessor *gCodeProcessor = new GCodeProcessor();
 
 unsigned long reportingPeriod = 5000;
 unsigned long lastAction;
-unsigned long currentTime;
-unsigned long cycleCounter = 0;
 bool previousEmergencyStop = false;
 
 unsigned long pinGuardLastCheck;
-unsigned long pinGuardCurrentTime;
 
 int lastParamChangeNr = 0;
 
@@ -75,8 +72,8 @@ void interrupt(void)
   }
 }
 #else
-ISR(TIMER2_OVF_vect) {
-
+ISR(TIMER2_OVF_vect) 
+{
   if (interruptBusy == false)
   {
     interruptBusy = true;
@@ -169,7 +166,7 @@ void setup()
     pinMode(SERVO_3_PIN, OUTPUT);
 
     //setup encoders pins
-#if defined(STEPPER_HAS_ENCODER)
+#if defined(BOARD_HAS_ENCODER)
     pinMode(X_ENCDR_A, INPUT_PULLUP);
     pinMode(X_ENCDR_B, INPUT_PULLUP);
 
@@ -245,9 +242,6 @@ void setup()
   // Initialize the inactivity check
   lastAction = millis();
 
-  pinGuardCurrentTime = millis();
-  pinGuardLastCheck = millis();
-
   if
   (
     (ParameterList::getInstance()->getValue(PARAM_CONFIG_OK) == 1) &&
@@ -279,56 +273,28 @@ void setup()
   }
 
   Serial.print("R99 ARDUINO STARTUP COMPLETE\r\n");
-
-  //StepperControl::getInstance()->test2();
 }
 
 char commandChar[INCOMING_CMD_BUF_SIZE + 1];
 
-// int cycleCountTest = 0;
 
 // The loop function is called in an endless loop
 void loop()
 {
-
-  //Serial.print(millis());
-  //Serial.print("\r\n");
-  //delay(1000);
-
-  //StepperControl::getInstance()->test();
-  //delayMicroseconds(100);
-
-  //digitalWrite(LED_PIN, true);
-  //delay(250);
-  //digitalWrite(LED_PIN, false);
-  //delay(250);
-
-  if (debugInterrupt)
-  {
-    StepperControl::getInstance()->handleMovementInterrupt();
-  }
-
   #if defined(BOARD_HAS_DYNAMICS_LAB_CHIP)
     // Check encoders out of interrupt for farmduino 1.4
     StepperControl::getInstance()->checkEncoders();
   #endif
 
-  pinGuardCurrentTime = millis();
-  if (pinGuardCurrentTime < pinGuardLastCheck)
+  // Check PinGuards
+  if (millis() - pinGuardLastCheck >= 1000)
   {
-    pinGuardLastCheck = pinGuardCurrentTime;
-  }
-  else
-  {
-    if (pinGuardCurrentTime - pinGuardLastCheck >= 1000)
-    {
-      pinGuardLastCheck += 1000;
-
-      // check the pins for timeouts
-      PinGuard::getInstance()->checkPins();
-    }
+    // check the pins for timeouts
+    PinGuard::getInstance()->checkPins();
+    pinGuardLastCheck = millis();
   }
 
+  // handle Serial
   if (Serial.available())
   {
     // Save current time stamp for timeout actions
@@ -338,7 +304,7 @@ void loop()
     incomingChar = Serial.read();
 
     // Filter out emergency stop.
-    if (!(incomingChar == 69 || incomingChar == 101))
+    if (!(incomingChar == 'E' || incomingChar == 'e'))
     {
       incomingCommandArray[incomingCommandPointer] = incomingChar;
       incomingCommandPointer++;
@@ -358,8 +324,6 @@ void loop()
 
     if (incomingChar == '\n' || incomingCommandPointer >= INCOMING_CMD_BUF_SIZE)
     {
-
-      //char commandChar[incomingCommandPointer + 1];
       for (int i = 0; i < incomingCommandPointer - 1; i++)
       {
           commandChar[i] = incomingCommandArray[i];
@@ -391,7 +355,6 @@ void loop()
         free(command);
 
       }
-
       incomingCommandPointer = 0;
     }
   }
@@ -429,80 +392,45 @@ void loop()
   }
 
   // Do periodic checks and feedback
-
-  currentTime = millis();
-  if (currentTime < lastAction)
+  if ((millis() - lastAction) > reportingPeriod)
   {
+    // After an idle time, send the idle message
 
-    // If the device timer overruns, reset the idle counter
-    lastAction = millis();
-  }
-  else
-  {
-
-    if ((currentTime - lastAction) > reportingPeriod)
+    if (CurrentState::getInstance()->isEmergencyStop())
     {
-      // After an idle time, send the idle message
-
-      if (CurrentState::getInstance()->isEmergencyStop())
-      {
-        Serial.print(COMM_REPORT_EMERGENCY_STOP);
-        CurrentState::getInstance()->printQAndNewLine();
-
-        if (debugMessages)
-        {
-          Serial.print(COMM_REPORT_COMMENT);
-          Serial.print(" Emergency stop engaged");
-          CurrentState::getInstance()->printQAndNewLine();
-        }
-      }
-      else
-      {
-        Serial.print(COMM_REPORT_CMD_IDLE);
-        CurrentState::getInstance()->printQAndNewLine();
-      }
-
-      StepperControl::getInstance()->storePosition();
-      CurrentState::getInstance()->printPosition();
-
-      StepperControl::getInstance()->reportEncoders();
-
-      CurrentState::getInstance()->storeEndStops();
-      CurrentState::getInstance()->printEndStops();
-
-      // cycleCountTest++;
-      // Serial.print("R99 TST Cycle count ");
-      // Serial.print(cycleCountTest);
-      // Serial.print(" ");
-      // CurrentState::getInstance()->printQAndNewLine();
-
+      Serial.print(COMM_REPORT_EMERGENCY_STOP);
+      CurrentState::getInstance()->printQAndNewLine();
 
       if (debugMessages)
       {
         Serial.print(COMM_REPORT_COMMENT);
-        Serial.print(" MEM ");
-        Serial.print(freeMemory());
-        CurrentState::getInstance()->printQAndNewLine();
-
-        Serial.print(COMM_REPORT_COMMENT);
-        Serial.print(" IND DUR ");
-        Serial.print(interruptDuration);
-        Serial.print(" MAX ");
-        Serial.print(interruptDurationMax);
-        CurrentState::getInstance()->printQAndNewLine();
-
-        StepperControl::getInstance()->test();
-      }
-
-      if (ParameterList::getInstance()->getValue(PARAM_CONFIG_OK) != 1)
-      {
-        Serial.print(COMM_REPORT_NO_CONFIG);
+        Serial.print(" Emergency stop engaged");
         CurrentState::getInstance()->printQAndNewLine();
       }
-
-      cycleCounter++;
-      lastAction = millis();
     }
+    else
+    {
+      Serial.print(COMM_REPORT_CMD_IDLE);
+      CurrentState::getInstance()->printQAndNewLine();
+    }
+
+    StepperControl::getInstance()->storePosition();
+    CurrentState::getInstance()->printPosition();
+
+    #if defined(BOARD_HAS_ENCODER)
+      StepperControl::getInstance()->reportEncoders();
+    #endif
+
+    CurrentState::getInstance()->storeEndStops();
+    CurrentState::getInstance()->printEndStops();
+
+    if (ParameterList::getInstance()->getValue(PARAM_CONFIG_OK) != 1)
+    {
+      Serial.print(COMM_REPORT_NO_CONFIG);
+      CurrentState::getInstance()->printQAndNewLine();
+    }
+
+    lastAction = millis();
   }
 
 }

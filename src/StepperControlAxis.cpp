@@ -48,11 +48,6 @@ StepperControlAxis::StepperControlAxis()
 
 }
 
-void StepperControlAxis::test()
-{
-
-}
-
 #if defined(BOARD_HAS_TMC2130_DRIVER)
 
 unsigned int StepperControlAxis::getLostSteps()
@@ -338,31 +333,14 @@ void StepperControlAxis::checkMovement()
   {
 
     // home or destination not reached, keep moving
-
-    // If end stop reached or the encoder doesn't move anymore, stop moving motor, otherwise set the timing for the next step
-    if ((coordHomeAxis && !endStopAxisReached(false)) || (!coordHomeAxis && !endStopAxisReached(!movementToHome)))
-    {
-
-      // Get the axis speed, in steps per second
-      axisSpeed = calculateSpeed(coordSourcePoint, coordCurrentPoint, coordDestinationPoint,
-                                 motorSpeedMin, motorSpeedMax, motorStepsAcc);
-
-    }
-    else
-    {
-      axisActive = false;
-    }
+    // Get the axis speed, in steps per second
+    axisSpeed = calculateSpeed(coordSourcePoint, coordCurrentPoint, coordDestinationPoint,
+                                motorSpeedMin, motorSpeedMax, motorStepsAcc);
   }
   else
   {
     // Destination or home reached. Deactivate the axis.
     axisActive = false;
-  }
-
-  // If end stop for home is active, set the position to zero
-  if (endStopAxisReached(false))
-  {
-    coordCurrentPoint = 0;
   }
 }
 

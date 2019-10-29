@@ -26,24 +26,6 @@ StepperControlEncoder::StepperControlEncoder()
 #endif
 }
 
-void StepperControlEncoder::test()
-{
-  /*
-                Serial.print("R88 ");
-                Serial.print("position ");
-                Serial.print(position);
-                Serial.print(" channel A ");
-                Serial.print(prvValChannelA);
-                Serial.print(" -> ");
-                Serial.print(curValChannelA);
-                Serial.print(" channel B ");
-                Serial.print(prvValChannelB);
-                Serial.print(" -> ");
-                Serial.print(curValChannelB);
-                Serial.print("\r\n");
-*/
-}
-
 void StepperControlEncoder::loadPinNumbers(int channelA, int channelB, int channelAQ, int channelBQ)
 {
   pinChannelA = channelA;
@@ -91,7 +73,7 @@ void StepperControlEncoder::setPosition(long newPosition)
       SPI.transfer(reset_cmd | (mdlEncoder << mdl_spi_encoder_offset));
       digitalWrite(NSS_PIN, HIGH);
     }
-  #elif defined(STEPPER_HAS_ENCODER)
+  #elif defined(BOARD_HAS_ENCODER)
     position = newPosition;
   #endif
 }
@@ -125,7 +107,7 @@ void StepperControlEncoder::checkEncoder(bool channelA, bool channelB, bool chan
 {
   #if defined(BOARD_HAS_DYNAMICS_LAB_CHIP)
     processEncoder();
-  #elif defined(STEPPER_HAS_ENCODER)
+  #elif defined(BOARD_HAS_ENCODER)
     shiftChannels();
     setChannels(channelA, channelB, channelAQ, channelBQ);
     processEncoder();
@@ -169,7 +151,7 @@ void StepperControlEncoder::processEncoder()
     digitalWrite(NSS_PIN, HIGH);
     position = encoderVal;
 
-  #elif defined(STEPPER_HAS_ENCODER)
+  #elif defined(BOARD_HAS_ENCODER)
 
     // Detect edges on the A channel when the B channel is high
     if (curValChannelB == true && prvValChannelA == false && curValChannelA == true)
@@ -188,7 +170,7 @@ void StepperControlEncoder::processEncoder()
 
 void StepperControlEncoder::readChannels()
 {
-#if !defined(BOARD_HAS_DYNAMICS_LAB_CHIP) && defined(STEPPER_HAS_ENCODER)
+#if !defined(BOARD_HAS_DYNAMICS_LAB_CHIP) && defined(BOARD_HAS_ENCODER)
   // read the new values from the coder
 
   readChannelA = digitalRead(pinChannelA);

@@ -83,7 +83,6 @@ public:
   void resetStepDone();
 
   void activateDebugPrint();
-  void test();
 
   char channelLabel;
   bool movementStarted;

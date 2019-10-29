@@ -61,8 +61,6 @@ public:
   void reportEncoders();
   void getEncoderReport();
 
-  void test();
-  void test2();
 	unsigned long i1 = 0;
 	unsigned long i2 = 0;
   unsigned long i3 = 0;
@@ -90,7 +88,6 @@ private:
   void checkAxisVsEncoder(StepperControlAxis *axis, StepperControlEncoder *encoder, float *missedSteps, long *lastPosition, long *encoderLastPosition, int *encoderUseForPos, float *encoderStepDecay, bool *encoderEnabled);
   void checkAxisSubStatus(StepperControlAxis *axis, int *axisSubStatus);
 
-  bool axisActive[3] = { false, false, false };
   int axisSubStep[3] = { 0, 0, 0 };
 
   void loadMotorSettings();
@@ -110,7 +107,6 @@ private:
 
   bool homeIsUp[3] = {false, false, false};
   long speedMax[3] = {0, 0, 0 };
-  long commandSpeed[3] = { 0, 0, 0 };
   long speedMin[3] = { 0, 0, 0 };
   long speedHome[3] = { 0, 0, 0 };
   long stepsAcc[3] = { 0, 0, 0 };
