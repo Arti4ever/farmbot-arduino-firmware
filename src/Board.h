@@ -15,6 +15,7 @@
   #undef FARMDUINO_V10
   #undef FARMDUINO_V14
   #undef FARMDUINO_EXP_V20
+  #undef FYSETC_F6
 
   #if FARMBOT_BOARD_ID == 0
     #define RAMPS_V14
@@ -24,6 +25,8 @@
     #define FARMDUINO_V14
   #elif FARMBOT_BOARD_ID == 3
     #define FARMDUINO_EXP_V20
+  #elif FARMBOT_BOARD_ID == 100
+    #define FYSETC_F6
   #endif
 
 #endif
