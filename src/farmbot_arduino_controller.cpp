@@ -119,6 +119,13 @@ void setup()
     pinMode(AUX_ENABLE_PIN, OUTPUT);
     digitalWrite(AUX_ENABLE_PIN, HIGH);
 
+    #if defined(FYSETC_F6)
+      pinMode(AUX_2_STEP_PIN, OUTPUT);
+      pinMode(AUX_2_DIR_PIN, OUTPUT);
+      pinMode(AUX_2_ENABLE_PIN, OUTPUT);
+      digitalWrite(AUX_2_ENABLE_PIN, HIGH);    
+    #endif
+
     #if defined(BOARD_HAS_TMC2130_DRIVER)
       pinMode(X_CHIP_SELECT, OUTPUT);
       pinMode(E_CHIP_SELECT, OUTPUT);
@@ -145,6 +152,9 @@ void setup()
   #if defined(FYSETC_F6)
     pinMode(PERIPHERAL_6_PIN, OUTPUT);
     pinMode(PERIPHERAL_7_PIN, OUTPUT);
+    pinMode(RGB_LED_R_PIN, OUTPUT);
+    pinMode(RGB_LED_G_PIN, OUTPUT);
+    pinMode(RGB_LED_B_PIN, OUTPUT);
   #endif
 
     //setup UTM pins
