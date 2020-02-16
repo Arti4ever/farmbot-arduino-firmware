@@ -117,10 +117,10 @@
     <ClCompile Include="ServoControl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="StepperControlAxis.cpp">
+    <ClCompile Include="MovementAxis.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="StepperControlEncoder.cpp">
+    <ClCompile Include="MovementEncoder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TimerOne.cpp">
@@ -129,7 +129,7 @@
     <ClCompile Include="StatusList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="StepperControl.cpp">
+    <ClCompile Include="Movement.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="F09Handler.cpp">
@@ -245,10 +245,10 @@
     <ClInclude Include="ServoControl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="StepperControlAxis.h">
+    <ClInclude Include="MovementAxis.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="StepperControlEncoder.h">
+    <ClInclude Include="MovementEncoder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TimerOne.h">
@@ -257,7 +257,7 @@
     <ClInclude Include="StatusList.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="StepperControl.h">
+    <ClInclude Include="Movement.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="__vm\.src.vsarduino.h">

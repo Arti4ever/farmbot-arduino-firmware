@@ -1,5 +1,5 @@
 /*
- * StepperControlAxis.h
+ * MovementAxis.h
  *
  *  Created on: 18 juli 2015
  *      Author: Tim Evers
@@ -12,7 +12,7 @@
 #include "CurrentState.h"
 #include "ParameterList.h"
 #include "pins.h"
-#include "StepperControlEncoder.h"
+#include "MovementEncoder.h"
 #include "Config.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -22,11 +22,11 @@
 #endif
 
 
-class StepperControlAxis
+class MovementAxis
 {
 
 public:
-  StepperControlAxis();
+  MovementAxis();
 
 #if defined(BOARD_HAS_TMC2130_DRIVER)
   TMC2130Stepper *TMC2130A;
@@ -174,10 +174,10 @@ private:
   void checkAxisDirection();
 
 
-  void (StepperControlAxis::*setMotorStepWrite)();
-  void (StepperControlAxis::*setMotorStepWrite2)();
-  void (StepperControlAxis::*resetMotorStepWrite)();
-  void (StepperControlAxis::*resetMotorStepWrite2)();
+  void (MovementAxis::*setMotorStepWrite)();
+  void (MovementAxis::*setMotorStepWrite2)();
+  void (MovementAxis::*resetMotorStepWrite)();
+  void (MovementAxis::*resetMotorStepWrite2)();
 
   void setMotorStepWriteDefault();
   void setMotorStepWriteDefault2();

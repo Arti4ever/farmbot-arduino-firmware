@@ -121,9 +121,9 @@
     <ClCompile Include="PinGuardPin.cpp" />
     <ClCompile Include="ServoControl.cpp" />
     <ClCompile Include="StatusList.cpp" />
-    <ClCompile Include="StepperControl.cpp" />
-    <ClCompile Include="StepperControlAxis.cpp" />
-    <ClCompile Include="StepperControlEncoder.cpp" />
+    <ClCompile Include="Movement.cpp" />
+    <ClCompile Include="MovementAxis.cpp" />
+    <ClCompile Include="MovementEncoder.cpp" />
     <ClCompile Include="TimerOne.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -167,9 +167,9 @@
     <ClInclude Include="pins.h" />
     <ClInclude Include="ServoControl.h" />
     <ClInclude Include="StatusList.h" />
-    <ClInclude Include="StepperControl.h" />
-    <ClInclude Include="StepperControlAxis.h" />
-    <ClInclude Include="StepperControlEncoder.h" />
+    <ClInclude Include="Movement.h" />
+    <ClInclude Include="MovementAxis.h" />
+    <ClInclude Include="MovementEncoder.h" />
     <ClInclude Include="TimerOne.h" />
     <ClInclude Include="__vm\.farmbot-arduino-controller.vsarduino.h" />
     <ClInclude Include="__vm\.src.vsarduino.h" />

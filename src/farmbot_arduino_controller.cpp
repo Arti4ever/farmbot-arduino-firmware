@@ -2,7 +2,7 @@
 #include "farmbot_arduino_controller.h"
 #include "pins.h"
 #include "Config.h"
-#include "StepperControl.h"
+#include "Movement.h"
 #include "ServoControl.h"
 #include "PinGuard.h"
 #include "MemoryFree.h"
@@ -66,7 +66,7 @@ void interrupt(void)
       //interruptStartTime = micros();
 
       interruptBusy = true;
-      StepperControl::getInstance()->handleMovementInterrupt();
+      Movement::getInstance()->handleMovementInterrupt();
       interruptBusy = false;
     }
   }
@@ -77,7 +77,7 @@ ISR(TIMER2_OVF_vect)
   if (interruptBusy == false)
   {
     interruptBusy = true;
-    StepperControl::getInstance()->handleMovementInterrupt();
+    Movement::getInstance()->handleMovementInterrupt();
     interruptBusy = false;
   }
 }
@@ -226,7 +226,7 @@ void setup()
   //ServoControl::getInstance()->attach();
 
   // Load motor settings
-  StepperControl::getInstance()->loadSettings();
+  Movement::getInstance()->loadSettings();
 
   // Dump all values to the serial interface
   // ParameterList::getInstance()->readAllValues();
@@ -259,7 +259,7 @@ void setup()
   )
   {
     Serial.print("R99 HOME Z ON STARTUP\r\n");
-    StepperControl::getInstance()->moveToCoords(0, 0, 0, 0, 0, 0, false, false, true);
+    Movement::getInstance()->moveToCoords(0, 0, 0, 0, 0, 0, false, false, true);
   }
 
   if
@@ -269,7 +269,7 @@ void setup()
   )
   {
     Serial.print("R99 HOME Y ON STARTUP\r\n");
-    StepperControl::getInstance()->moveToCoords(0, 0, 0, 0, 0, 0, false, true, false);
+    Movement::getInstance()->moveToCoords(0, 0, 0, 0, 0, 0, false, true, false);
   }
 
   if
@@ -279,7 +279,7 @@ void setup()
   )
   {
     Serial.print("R99 HOME X ON STARTUP\r\n");
-    StepperControl::getInstance()->moveToCoords(0, 0, 0, 0, 0, 0, true, false, false);
+    Movement::getInstance()->moveToCoords(0, 0, 0, 0, 0, 0, true, false, false);
   }
 
   Serial.print("R99 ARDUINO STARTUP COMPLETE\r\n");
@@ -293,7 +293,7 @@ void loop()
 {
   #if defined(BOARD_HAS_DYNAMICS_LAB_CHIP)
     // Check encoders out of interrupt for farmduino 1.4
-    StepperControl::getInstance()->checkEncoders();
+    Movement::getInstance()->checkEncoders();
   #endif
 
   // Check PinGuards
@@ -373,7 +373,7 @@ void loop()
   // shut down the pins used
   if (previousEmergencyStop == false && CurrentState::getInstance()->isEmergencyStop())
   {
-    StepperControl::getInstance()->disableMotorsEmergency();
+    Movement::getInstance()->disableMotorsEmergency();
     PinControl::getInstance()->resetPinsUsed();
     ServoControl::getInstance()->detachServos();
     if (debugMessages)
@@ -397,7 +397,7 @@ void loop()
       CurrentState::getInstance()->printQAndNewLine();
     }
 
-    StepperControl::getInstance()->loadSettings();
+    Movement::getInstance()->loadSettings();
     PinGuard::getInstance()->loadConfig();
   }
 
@@ -424,11 +424,11 @@ void loop()
       CurrentState::getInstance()->printQAndNewLine();
     }
 
-    StepperControl::getInstance()->storePosition();
+    Movement::getInstance()->storePosition();
     CurrentState::getInstance()->printPosition();
 
     #if defined(BOARD_HAS_ENCODER)
-      StepperControl::getInstance()->reportEncoders();
+      Movement::getInstance()->reportEncoders();
     #endif
 
     CurrentState::getInstance()->storeEndStops();

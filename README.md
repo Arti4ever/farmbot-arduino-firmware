@@ -74,7 +74,7 @@ Farmbot_arduino_controller contains the setup() and main(). This is the main seq
              |           +---+
              v               v
      +--------------+   +-----------+
-     |StepperControl|   | PinControl|
+     |Movement|   | PinControl|
      +--------------+   +-----------+
 
 ```

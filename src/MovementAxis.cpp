@@ -1,4 +1,4 @@
-#include "StepperControlAxis.h"
+#include "MovementAxis.h"
 
 #if defined(BOARD_HAS_TMC2130_DRIVER)
 static TMC2130Stepper TMC2130X(X_CHIP_SELECT);
@@ -8,7 +8,7 @@ static TMC2130Stepper TMC2130E(E_CHIP_SELECT);
 #endif
 
 
-StepperControlAxis::StepperControlAxis()
+MovementAxis::MovementAxis()
 {
   lastCalcLog = 0;
 
@@ -41,21 +41,21 @@ StepperControlAxis::StepperControlAxis()
 
   stepIsOn = false;
 
-  setMotorStepWrite = &StepperControlAxis::setMotorStepWriteDefault;
-  setMotorStepWrite2 = &StepperControlAxis::setMotorStepWriteDefault2;
-  resetMotorStepWrite = &StepperControlAxis::resetMotorStepWriteDefault;
-  resetMotorStepWrite2 = &StepperControlAxis::resetMotorStepWriteDefault2;
+  setMotorStepWrite = &MovementAxis::setMotorStepWriteDefault;
+  setMotorStepWrite2 = &MovementAxis::setMotorStepWriteDefault2;
+  resetMotorStepWrite = &MovementAxis::resetMotorStepWriteDefault;
+  resetMotorStepWrite2 = &MovementAxis::resetMotorStepWriteDefault2;
 
 }
 
 #if defined(BOARD_HAS_TMC2130_DRIVER)
 
-unsigned int StepperControlAxis::getLostSteps()
+unsigned int MovementAxis::getLostSteps()
 {
   return TMC2130A->LOST_STEPS();
 }
 
-void StepperControlAxis::initTMC2130()
+void MovementAxis::initTMC2130()
 {
   if (channelLabel == 'X')
   {
@@ -78,14 +78,14 @@ void StepperControlAxis::initTMC2130()
     TMC2130B->begin();                    // Initiate pins and registeries
   }
 
-  setMotorStepWrite = &StepperControlAxis::setMotorStepWriteTMC2130;
-  setMotorStepWrite2 = &StepperControlAxis::setMotorStepWriteTMC2130_2;
-  resetMotorStepWrite = &StepperControlAxis::resetMotorStepWriteTMC2130;
-  resetMotorStepWrite2 = &StepperControlAxis::resetMotorStepWriteTMC2130_2;
+  setMotorStepWrite = &MovementAxis::setMotorStepWriteTMC2130;
+  setMotorStepWrite2 = &MovementAxis::setMotorStepWriteTMC2130_2;
+  resetMotorStepWrite = &MovementAxis::resetMotorStepWriteTMC2130;
+  resetMotorStepWrite2 = &MovementAxis::resetMotorStepWriteTMC2130_2;
 
 }
 
-void StepperControlAxis::loadSettingsTMC2130(int motorCurrent, int  stallSensitivity, int microSteps)
+void MovementAxis::loadSettingsTMC2130(int motorCurrent, int  stallSensitivity, int microSteps)
 {
   /*
   Serial.println("loading settings");
@@ -149,17 +149,17 @@ void StepperControlAxis::loadSettingsTMC2130(int motorCurrent, int  stallSensiti
   }
 }
 
-bool StepperControlAxis::stallDetected() {
+bool MovementAxis::stallDetected() {
   return TMC2130A->stallguard();
 }
 
-uint16_t StepperControlAxis::getLoad() {
+uint16_t MovementAxis::getLoad() {
   return TMC2130A->sg_result();
 }
 
 #endif
 
-unsigned int StepperControlAxis::calculateSpeed(long sourcePosition, long currentPosition, long destinationPosition, long minSpeed, long maxSpeed, long stepsAccDec)
+unsigned int MovementAxis::calculateSpeed(long sourcePosition, long currentPosition, long destinationPosition, long minSpeed, long maxSpeed, long stepsAccDec)
 {
 
   int newSpeed = 0;
@@ -282,7 +282,7 @@ unsigned int StepperControlAxis::calculateSpeed(long sourcePosition, long curren
   return newSpeed;
 }
 
-void StepperControlAxis::checkAxisDirection()
+void MovementAxis::checkAxisDirection()
 {
 
   if (coordHomeAxis)
@@ -305,7 +305,7 @@ void StepperControlAxis::checkAxisDirection()
   }
 }
 
-void StepperControlAxis::setDirectionAxis()
+void MovementAxis::setDirectionAxis()
 {
 
   if (((!coordHomeAxis && coordCurrentPoint < coordDestinationPoint) || (coordHomeAxis && motorHomeIsUp)))
@@ -318,7 +318,7 @@ void StepperControlAxis::setDirectionAxis()
   }
 }
 
-void StepperControlAxis::checkMovement()
+void MovementAxis::checkMovement()
 {
 
   checkAxisDirection();
@@ -344,7 +344,7 @@ void StepperControlAxis::checkMovement()
   }
 }
 
-void StepperControlAxis::incrementTick()
+void MovementAxis::incrementTick()
 {
   if (axisActive)
   {
@@ -352,7 +352,7 @@ void StepperControlAxis::incrementTick()
   }
 }
 
-void StepperControlAxis::checkTiming()
+void MovementAxis::checkTiming()
 {
 
   if (stepIsOn)
@@ -379,7 +379,7 @@ void StepperControlAxis::checkTiming()
   }
 }
 
-void StepperControlAxis::setTicks()
+void MovementAxis::setTicks()
 {
   // Take the requested speed (steps / second) and divide by the interrupt speed (interrupts per seconde)
   // This gives the number of interrupts (called ticks here) before the pulse needs to be set for the next step
@@ -387,7 +387,7 @@ void StepperControlAxis::setTicks()
   stepOffTick = moveTicks + (1000.0 * 1000.0 / motorInterruptSpeed / axisSpeed);
 }
 
-void StepperControlAxis::setStepAxis()
+void MovementAxis::setStepAxis()
 {
 
   stepIsOn = true;
@@ -405,7 +405,7 @@ void StepperControlAxis::setStepAxis()
   setMotorStep();
 }
 
-bool StepperControlAxis::endStopAxisReached(bool movement_forward)
+bool MovementAxis::endStopAxisReached(bool movement_forward)
 {
 
   bool min_endstop = false;
@@ -441,7 +441,7 @@ bool StepperControlAxis::endStopAxisReached(bool movement_forward)
   return 0;
 }
 
-void StepperControlAxis::StepperControlAxis::loadPinNumbers(int step, int dir, int enable, int min, int max, int step2, int dir2, int enable2)
+void MovementAxis::MovementAxis::loadPinNumbers(int step, int dir, int enable, int min, int max, int step2, int dir2, int enable2)
 {
   pinStep = step;
   pinDirection = dir;
@@ -455,7 +455,7 @@ void StepperControlAxis::StepperControlAxis::loadPinNumbers(int step, int dir, i
   pinMax = max;
 }
 
-void StepperControlAxis::loadMotorSettings(
+void MovementAxis::loadMotorSettings(
     long speedMax, long speedMin, long speedHome, long stepsAcc, long timeOut, bool homeIsUp, bool motorInv,
     bool endStInv, bool endStInv2, long interruptSpeed, bool motor2Enbl, bool motor2Inv, bool endStEnbl,
     bool stopAtHome, long maxSize, bool stopAtMax)
@@ -481,33 +481,33 @@ void StepperControlAxis::loadMotorSettings(
 #if !defined(BOARD_HAS_TMC2130_DRIVER)
   if (pinStep == 54)
   {
-    setMotorStepWrite = &StepperControlAxis::setMotorStepWrite54;
-    resetMotorStepWrite = &StepperControlAxis::resetMotorStepWrite54;
+    setMotorStepWrite = &MovementAxis::setMotorStepWrite54;
+    resetMotorStepWrite = &MovementAxis::resetMotorStepWrite54;
   }
   
   if (pinStep == 60)
   {
-    setMotorStepWrite = &StepperControlAxis::setMotorStepWrite60;
-    resetMotorStepWrite = &StepperControlAxis::resetMotorStepWrite60;
+    setMotorStepWrite = &MovementAxis::setMotorStepWrite60;
+    resetMotorStepWrite = &MovementAxis::resetMotorStepWrite60;
   }
   
 
   if (pinStep == 46)
   {
-    setMotorStepWrite = &StepperControlAxis::setMotorStepWrite46;
-    resetMotorStepWrite = &StepperControlAxis::resetMotorStepWrite46;
+    setMotorStepWrite = &MovementAxis::setMotorStepWrite46;
+    resetMotorStepWrite = &MovementAxis::resetMotorStepWrite46;
   }
 
   if (pin2Step == 26)
   {
-    setMotorStepWrite2 = &StepperControlAxis::setMotorStepWrite26;
-    resetMotorStepWrite2 = &StepperControlAxis::resetMotorStepWrite26;
+    setMotorStepWrite2 = &MovementAxis::setMotorStepWrite26;
+    resetMotorStepWrite2 = &MovementAxis::resetMotorStepWrite26;
   }
 #endif
 
 }
 
-bool StepperControlAxis::loadCoordinates(long sourcePoint, long destinationPoint, bool home)
+bool MovementAxis::loadCoordinates(long sourcePoint, long destinationPoint, bool home)
 {
 
   coordSourcePoint = sourcePoint;
@@ -559,7 +559,7 @@ bool StepperControlAxis::loadCoordinates(long sourcePoint, long destinationPoint
   return changed;
 }
 
-void StepperControlAxis::enableMotor()
+void MovementAxis::enableMotor()
 {
   digitalWrite(pinEnable, LOW);
   if (motorMotor2Enl)
@@ -569,7 +569,7 @@ void StepperControlAxis::enableMotor()
   movementMotorActive = true;
 }
 
-void StepperControlAxis::disableMotor()
+void MovementAxis::disableMotor()
 {
   digitalWrite(pinEnable, HIGH);
   if (motorMotor2Enl)
@@ -579,7 +579,7 @@ void StepperControlAxis::disableMotor()
   movementMotorActive = false;
 }
 
-void StepperControlAxis::setDirectionUp()
+void MovementAxis::setDirectionUp()
 {
 #if defined(BOARD_HAS_TMC2130_DRIVER)
   // The TMC2130 uses a command to change direction, not a pin
@@ -625,7 +625,7 @@ void StepperControlAxis::setDirectionUp()
 
 }
 
-void StepperControlAxis::setDirectionDown()
+void MovementAxis::setDirectionDown()
 {
 #if defined(BOARD_HAS_TMC2130_DRIVER)
   // The TMC2130 uses a command to change direction, not a pin
@@ -671,17 +671,17 @@ void StepperControlAxis::setDirectionDown()
 
 }
 
-void StepperControlAxis::setMovementUp()
+void MovementAxis::setMovementUp()
 {
   movementUp = true;
 }
 
-void StepperControlAxis::setMovementDown()
+void MovementAxis::setMovementDown()
 {
   movementUp = false;
 }
 
-void StepperControlAxis::setDirectionHome()
+void MovementAxis::setDirectionHome()
 {
   if (motorHomeIsUp)
   {
@@ -695,7 +695,7 @@ void StepperControlAxis::setDirectionHome()
   }
 }
 
-void StepperControlAxis::setDirectionAway()
+void MovementAxis::setDirectionAway()
 {
   if (motorHomeIsUp)
   {
@@ -709,7 +709,7 @@ void StepperControlAxis::setDirectionAway()
   }
 }
 
-unsigned long StepperControlAxis::getLength(long l1, long l2)
+unsigned long MovementAxis::getLength(long l1, long l2)
 {
   if (l1 > l2)
   {
@@ -721,34 +721,34 @@ unsigned long StepperControlAxis::getLength(long l1, long l2)
   }
 }
 
-bool StepperControlAxis::endStopsReached()
+bool MovementAxis::endStopsReached()
 {
   return ((digitalRead(pinMin) == motorEndStopInv2) || (digitalRead(pinMax) == motorEndStopInv2)) && motorEndStopEnbl;
 }
 
-bool StepperControlAxis::endStopMin()
+bool MovementAxis::endStopMin()
 {
   //return ((digitalRead(pinMin) == motorEndStopInv) || (digitalRead(pinMax) == motorEndStopInv));
   return ((digitalRead(pinMin) == motorEndStopInv2) && motorEndStopEnbl);
 }
 
-bool StepperControlAxis::endStopMax()
+bool MovementAxis::endStopMax()
 {
   //return ((digitalRead(pinMin) == motorEndStopInv) || (digitalRead(pinMax) == motorEndStopInv));
   return ((digitalRead(pinMax) == motorEndStopInv2) && motorEndStopEnbl);
 }
 
-bool StepperControlAxis::isAxisActive()
+bool MovementAxis::isAxisActive()
 {
   return axisActive;
 }
 
-void StepperControlAxis::deactivateAxis()
+void MovementAxis::deactivateAxis()
 {
   axisActive = false;
 }
 
-void StepperControlAxis::setMotorStep()
+void MovementAxis::setMotorStep()
 {
   stepIsOn = true;
 
@@ -760,7 +760,7 @@ void StepperControlAxis::setMotorStep()
   }
 }
 
-void StepperControlAxis::resetMotorStep()
+void MovementAxis::resetMotorStep()
 {
   stepIsOn = false;
   movementStepDone = true;
@@ -773,77 +773,77 @@ void StepperControlAxis::resetMotorStep()
   }
 }
 
-bool StepperControlAxis::pointReached(long currentPoint, long destinationPoint)
+bool MovementAxis::pointReached(long currentPoint, long destinationPoint)
 {
   return (destinationPoint == currentPoint);
 }
 
-long StepperControlAxis::currentPosition()
+long MovementAxis::currentPosition()
 {
   return coordCurrentPoint;
 }
 
-void StepperControlAxis::setCurrentPosition(long newPos)
+void MovementAxis::setCurrentPosition(long newPos)
 {
   coordCurrentPoint = newPos;
 }
 
-long StepperControlAxis::destinationPosition()
+long MovementAxis::destinationPosition()
 {
   return coordDestinationPoint;
 }
 
-void StepperControlAxis::setMaxSpeed(long speed)
+void MovementAxis::setMaxSpeed(long speed)
 {
   motorSpeedMax = speed;
 }
 
-void StepperControlAxis::activateDebugPrint()
+void MovementAxis::activateDebugPrint()
 {
   debugPrint = true;
 }
 
-bool StepperControlAxis::isStepDone()
+bool MovementAxis::isStepDone()
 {
   return movementStepDone;
 }
 
-void StepperControlAxis::resetStepDone()
+void MovementAxis::resetStepDone()
 {
   movementStepDone = false;
 }
 
-bool StepperControlAxis::movingToHome()
+bool MovementAxis::movingToHome()
 {
   return movementToHome;
 }
 
-bool StepperControlAxis::movingUp()
+bool MovementAxis::movingUp()
 {
   return movementUp;
 }
 
-bool StepperControlAxis::isAccelerating()
+bool MovementAxis::isAccelerating()
 {
   return movementAccelerating;
 }
 
-bool StepperControlAxis::isDecelerating()
+bool MovementAxis::isDecelerating()
 {
   return movementDecelerating;
 }
 
-bool StepperControlAxis::isCruising()
+bool MovementAxis::isCruising()
 {
   return movementCruising;
 }
 
-bool StepperControlAxis::isCrawling()
+bool MovementAxis::isCrawling()
 {
   return movementCrawling;
 }
 
-bool StepperControlAxis::isMotorActive()
+bool MovementAxis::isMotorActive()
 {
   return movementMotorActive;
 }
@@ -851,34 +851,34 @@ bool StepperControlAxis::isMotorActive()
 /// Functions for pin writing using alternative method
 
 // Pin write default functions
-void StepperControlAxis::setMotorStepWriteDefault()
+void MovementAxis::setMotorStepWriteDefault()
 {
   digitalWrite(pinStep, HIGH);
 }
 
-void StepperControlAxis::setMotorStepWriteDefault2()
+void MovementAxis::setMotorStepWriteDefault2()
 {
   digitalWrite(pin2Step, HIGH);
 }
 
-void StepperControlAxis::resetMotorStepWriteDefault()
+void MovementAxis::resetMotorStepWriteDefault()
 {
   digitalWrite(pinStep, LOW);
 }
 
-void StepperControlAxis::resetMotorStepWriteDefault2()
+void MovementAxis::resetMotorStepWriteDefault2()
 {
   digitalWrite(pin2Step, LOW);
 }
 
 // X step
-void StepperControlAxis::setMotorStepWrite54()
+void MovementAxis::setMotorStepWrite54()
 {
   //PF0
   PORTF |= B00000001;
 }
 
-void StepperControlAxis::resetMotorStepWrite54()
+void MovementAxis::resetMotorStepWrite54()
 {
   //PF0
   PORTF &= B11111110;
@@ -886,38 +886,38 @@ void StepperControlAxis::resetMotorStepWrite54()
 
 
 // X step 2
-void StepperControlAxis::setMotorStepWrite26()
+void MovementAxis::setMotorStepWrite26()
 {
   //PA4
   PORTA |= B00010000;
 }
 
-void StepperControlAxis::resetMotorStepWrite26()
+void MovementAxis::resetMotorStepWrite26()
 {
   PORTA &= B11101111;
 }
 
 // Y step
-void StepperControlAxis::setMotorStepWrite60()
+void MovementAxis::setMotorStepWrite60()
 {
   //PF6
   PORTF |= B01000000;
 }
 
-void StepperControlAxis::resetMotorStepWrite60()
+void MovementAxis::resetMotorStepWrite60()
 {
   //PF6
   PORTF &= B10111111;
 }
 
 // Z step
-void StepperControlAxis::setMotorStepWrite46()
+void MovementAxis::setMotorStepWrite46()
 {
   //PL3
   PORTL |= B00001000;
 }
 
-void StepperControlAxis::resetMotorStepWrite46()
+void MovementAxis::resetMotorStepWrite46()
 {
   //PL3
   PORTL &= B11110111;
@@ -926,7 +926,7 @@ void StepperControlAxis::resetMotorStepWrite46()
 #if defined(BOARD_HAS_TMC2130_DRIVER)
 //// TMC2130 Functions
 
-void StepperControlAxis::setMotorStepWriteTMC2130()
+void MovementAxis::setMotorStepWriteTMC2130()
 {
   // TMC2130 works on each edge of the step pulse, 
   // so instead of setting the step bit, 
@@ -944,7 +944,7 @@ void StepperControlAxis::setMotorStepWriteTMC2130()
   }
 }
 
-void StepperControlAxis::setMotorStepWriteTMC2130_2()
+void MovementAxis::setMotorStepWriteTMC2130_2()
 {
   if (tmcStep2)
   {
@@ -958,12 +958,12 @@ void StepperControlAxis::setMotorStepWriteTMC2130_2()
   }
 }
 
-void StepperControlAxis::resetMotorStepWriteTMC2130()
+void MovementAxis::resetMotorStepWriteTMC2130()
 {
   // No action needed
 }
 
-void StepperControlAxis::resetMotorStepWriteTMC2130_2()
+void MovementAxis::resetMotorStepWriteTMC2130_2()
 {
   // No action needed
 }

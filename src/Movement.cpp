@@ -1,19 +1,19 @@
-#include "StepperControl.h"
+#include "Movement.h"
 #include "Debug.h"
 #include "Config.h"
 
-static StepperControl *instance;
+static Movement *instance;
 
-StepperControl *StepperControl::getInstance()
+Movement *Movement::getInstance()
 {
   if (!instance)
   {
-    instance = new StepperControl();
+    instance = new Movement();
   };
   return instance;
 };
 
-void StepperControl::reportEncoders()
+void Movement::reportEncoders()
 {
   Serial.print(COMM_REPORT_ENCODER_SCALED);
   Serial.print(" X");
@@ -35,7 +35,7 @@ void StepperControl::reportEncoders()
 
 }
 
-void StepperControl::getEncoderReport()
+void Movement::getEncoderReport()
 {
   serialBuffer += COMM_REPORT_ENCODER_SCALED;
   serialBuffer += " X";
@@ -56,7 +56,7 @@ void StepperControl::getEncoderReport()
   serialBuffer += CurrentState::getInstance()->getQAndNewLine();
 }
 
-void StepperControl::reportStatus(StepperControlAxis *axis, int axisStatus)
+void Movement::reportStatus(MovementAxis *axis, int axisStatus)
 {  
   serialBuffer += COMM_REPORT_CMD_STATUS;
   serialBuffer += " ";
@@ -65,7 +65,7 @@ void StepperControl::reportStatus(StepperControlAxis *axis, int axisStatus)
   serialBuffer += CurrentState::getInstance()->getQAndNewLine();
 }
 
-void StepperControl::reportCalib(StepperControlAxis *axis, int calibStatus)
+void Movement::reportCalib(MovementAxis *axis, int calibStatus)
 {
   Serial.print(COMM_REPORT_CALIB_STATUS);
   Serial.print(" ");
@@ -74,7 +74,7 @@ void StepperControl::reportCalib(StepperControlAxis *axis, int calibStatus)
   CurrentState::getInstance()->printQAndNewLine();
 }
 
-void StepperControl::checkAxisSubStatus(StepperControlAxis *axis, int *axisSubStatus)
+void Movement::checkAxisSubStatus(MovementAxis *axis, int *axisSubStatus)
 {
   int newStatus = 0;
   bool statusChanged = false;
@@ -114,7 +114,7 @@ void StepperControl::checkAxisSubStatus(StepperControlAxis *axis, int *axisSubSt
 
 //const int MOVEMENT_INTERRUPT_SPEED = 100; // Interrupt cycle in micro seconds
 
-StepperControl::StepperControl()
+Movement::Movement()
 {
 
   // Initialize some variables for testing
@@ -135,9 +135,9 @@ StepperControl::StepperControl()
 
   // Create the axis controllers
 
-  axisX = StepperControlAxis();
-  axisY = StepperControlAxis();
-  axisZ = StepperControlAxis();
+  axisX = MovementAxis();
+  axisY = MovementAxis();
+  axisZ = MovementAxis();
 
   axisX.channelLabel = 'X';
   axisY.channelLabel = 'Y';
@@ -145,9 +145,9 @@ StepperControl::StepperControl()
 
   // Create the encoder controller
 
-  encoderX = StepperControlEncoder();
-  encoderY = StepperControlEncoder();
-  encoderZ = StepperControlEncoder();
+  encoderX = MovementEncoder();
+  encoderY = MovementEncoder();
+  encoderZ = MovementEncoder();
 
   // Load settings
 
@@ -156,7 +156,7 @@ StepperControl::StepperControl()
   motorMotorsEnabled = false;
 }
 
-void StepperControl::loadSettings()
+void Movement::loadSettings()
 {
 
   // Load motor settings
@@ -192,14 +192,14 @@ void StepperControl::loadSettings()
 }
 
 #if defined(BOARD_HAS_TMC2130_DRIVER) 
-  void StepperControl::initTMC2130()
+  void Movement::initTMC2130()
   {
     axisX.initTMC2130();
     axisY.initTMC2130();
     axisZ.initTMC2130();
   }
 
-  void StepperControl::loadSettingsTMC2130()
+  void Movement::loadSettingsTMC2130()
   {
     int motorCurrent;
     int stallSensitivity;
@@ -230,7 +230,7 @@ void StepperControl::loadSettings()
  * maxStepsPerSecond - maximum number of steps per second
  * maxAccelerationStepsPerSecond - maximum number of acceleration in steps per second
  */
-int StepperControl::moveToCoords(double xDestScaled, double yDestScaled, double zDestScaled,
+int Movement::moveToCoords(double xDestScaled, double yDestScaled, double zDestScaled,
                                  unsigned int xMaxSpd, unsigned int yMaxSpd, unsigned int zMaxSpd,
                                  bool xHome, bool yHome, bool zHome)
 {
@@ -643,7 +643,7 @@ int StepperControl::moveToCoords(double xDestScaled, double yDestScaled, double 
   return error;
 }
 
-void StepperControl::serialBufferEmpty()
+void Movement::serialBufferEmpty()
 {
   while (serialBuffer.length() > 0)
   {
@@ -651,7 +651,7 @@ void StepperControl::serialBufferEmpty()
   }
 }
 
-void StepperControl::serialBufferSendNext()
+void Movement::serialBufferSendNext()
 {
   // Send the next char in the serialBuffer
   if (serialBuffer.length() > 0)
@@ -689,7 +689,7 @@ void StepperControl::serialBufferSendNext()
 // Calibration
 //
 
-int StepperControl::calibrateAxis(int axis)
+int Movement::calibrateAxis(int axis)
 {
 
   // Load motor and encoder settings
@@ -724,8 +724,8 @@ int StepperControl::calibrateAxis(int axis)
   reportEndStops();
 
   // Select the right axis
-  StepperControlAxis *calibAxis;
-  StepperControlEncoder *calibEncoder;
+  MovementAxis *calibAxis;
+  MovementEncoder *calibEncoder;
 
   switch (axis)
   {
@@ -1082,7 +1082,7 @@ int StepperControl::calibrateAxis(int axis)
 int debugPrintCount = 0;
 
 // Check encoder to verify the motor is at the right position
-void StepperControl::checkAxisVsEncoder(StepperControlAxis *axis, StepperControlEncoder *encoder, float *missedSteps, long *lastPosition, long *encoderLastPosition, int *encoderUseForPos, float *encoderStepDecay, bool *encoderEnabled)
+void Movement::checkAxisVsEncoder(MovementAxis *axis, MovementEncoder *encoder, float *missedSteps, long *lastPosition, long *encoderLastPosition, int *encoderUseForPos, float *encoderStepDecay, bool *encoderEnabled)
 {
 #if defined(BOARD_HAS_ENCODER)
   if (*encoderEnabled)
@@ -1174,7 +1174,7 @@ void StepperControl::checkAxisVsEncoder(StepperControlAxis *axis, StepperControl
 
 }
 
-void StepperControl::loadMotorSettings()
+void Movement::loadMotorSettings()
 {
 
   // Load settings
@@ -1276,7 +1276,7 @@ void StepperControl::loadMotorSettings()
   primeMotors();
 }
 
-bool StepperControl::intToBool(int value)
+bool Movement::intToBool(int value)
 {
   if (value == 1)
   {
@@ -1285,7 +1285,7 @@ bool StepperControl::intToBool(int value)
   return false;
 }
 
-void StepperControl::loadEncoderSettings()
+void Movement::loadEncoderSettings()
 {
 
   // Load encoder settings
@@ -1350,7 +1350,7 @@ void StepperControl::loadEncoderSettings()
   }
 }
 
-unsigned long StepperControl::getMaxLength(unsigned long lengths[3])
+unsigned long Movement::getMaxLength(unsigned long lengths[3])
 {
   unsigned long max = lengths[0];
   for (int i = 1; i < 3; i++)
@@ -1363,7 +1363,7 @@ unsigned long StepperControl::getMaxLength(unsigned long lengths[3])
   return max;
 }
 
-void StepperControl::enableMotors()
+void Movement::enableMotors()
 {
   motorMotorsEnabled = true;
 
@@ -1374,7 +1374,7 @@ void StepperControl::enableMotors()
   delay(100);
 }
 
-void StepperControl::disableMotorsEmergency()
+void Movement::disableMotorsEmergency()
 {
   motorMotorsEnabled = false;
 
@@ -1383,7 +1383,7 @@ void StepperControl::disableMotorsEmergency()
   axisZ.disableMotor();
 }
 
-void StepperControl::disableMotors()
+void Movement::disableMotors()
 {
   motorMotorsEnabled = false;
 
@@ -1394,19 +1394,19 @@ void StepperControl::disableMotors()
   delay(100);
 }
 
-void StepperControl::primeMotors()
+void Movement::primeMotors()
 {
   if (motorKeepActive[0] == 1) { axisX.enableMotor(); } else { axisX.disableMotor(); }
   if (motorKeepActive[1] == 1) { axisY.enableMotor(); } else { axisY.disableMotor(); }
   if (motorKeepActive[2] == 1) { axisZ.enableMotor(); } else { axisZ.disableMotor(); }
 }
 
-bool StepperControl::motorsEnabled()
+bool Movement::motorsEnabled()
 {
   return motorMotorsEnabled;
 }
 
-bool StepperControl::endStopsReached()
+bool Movement::endStopsReached()
 {
 
   if (axisX.endStopsReached() ||
@@ -1418,7 +1418,7 @@ bool StepperControl::endStopsReached()
   return false;
 }
 
-void StepperControl::storePosition()
+void Movement::storePosition()
 {
 
 #if defined(BOARD_HAS_ENCODER)
@@ -1456,41 +1456,41 @@ void StepperControl::storePosition()
 
 }
 
-void StepperControl::reportEndStops()
+void Movement::reportEndStops()
 {
   CurrentState::getInstance()->printEndStops();
 }
 
-void StepperControl::reportPosition()
+void Movement::reportPosition()
 {
   CurrentState::getInstance()->printPosition();
 }
 
-void StepperControl::storeEndStops()
+void Movement::storeEndStops()
 {
   CurrentState::getInstance()->storeEndStops();
 }
 
-void StepperControl::setPositionX(long pos)
+void Movement::setPositionX(long pos)
 {
   axisX.setCurrentPosition(pos);
   encoderX.setPosition(pos);
 }
 
-void StepperControl::setPositionY(long pos)
+void Movement::setPositionY(long pos)
 {
   axisY.setCurrentPosition(pos);
   encoderY.setPosition(pos);
 }
 
-void StepperControl::setPositionZ(long pos)
+void Movement::setPositionZ(long pos)
 {
   axisZ.setCurrentPosition(pos);
   encoderZ.setPosition(pos);
 }
 
 // Handle movement by checking each axis
-void StepperControl::handleMovementInterrupt(void)
+void Movement::handleMovementInterrupt(void)
 {
   // No need to check the encoders for Farmduino 1.4
   #if defined(BOARD_HAS_ENCODER) && !defined(BOARD_HAS_DYNAMICS_LAB_CHIP)
@@ -1510,7 +1510,7 @@ void StepperControl::handleMovementInterrupt(void)
 }
 
 #if defined(BOARD_HAS_ENCODER)
-void StepperControl::checkEncoders()
+void Movement::checkEncoders()
 {
   // read encoder pins using the arduino IN registers instead of digital in
   // because it used much fewer cpu cycles

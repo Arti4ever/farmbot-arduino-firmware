@@ -1,6 +1,6 @@
-#include "StepperControlEncoder.h"
+#include "MovementEncoder.h"
 
-StepperControlEncoder::StepperControlEncoder()
+MovementEncoder::MovementEncoder()
 {
   //lastCalcLog	= 0;
 
@@ -26,7 +26,7 @@ StepperControlEncoder::StepperControlEncoder()
 #endif
 }
 
-void StepperControlEncoder::loadPinNumbers(int channelA, int channelB, int channelAQ, int channelBQ)
+void MovementEncoder::loadPinNumbers(int channelA, int channelB, int channelAQ, int channelBQ)
 {
   pinChannelA = channelA;
   pinChannelB = channelB;
@@ -37,7 +37,7 @@ void StepperControlEncoder::loadPinNumbers(int channelA, int channelB, int chann
   shiftChannels();
 }
 
-void StepperControlEncoder::loadSettings(int encType, long scaling, int invert)
+void MovementEncoder::loadSettings(int encType, long scaling, int invert)
 {
   encoderType = encType;
   scalingFactor = scaling;
@@ -54,13 +54,13 @@ void StepperControlEncoder::loadSettings(int encType, long scaling, int invert)
 }
 
 #if defined(BOARD_HAS_DYNAMICS_LAB_CHIP)
-void StepperControlEncoder::loadMdlEncoderId(MdlSpiEncoders encoder)
+void MovementEncoder::loadMdlEncoderId(MdlSpiEncoders encoder)
 {
   mdlEncoder = encoder;
 }
 #endif
 
-void StepperControlEncoder::setPosition(long newPosition)
+void MovementEncoder::setPosition(long newPosition)
 {
   #if defined(BOARD_HAS_DYNAMICS_LAB_CHIP)
     if (newPosition == 0)
@@ -78,7 +78,7 @@ void StepperControlEncoder::setPosition(long newPosition)
   #endif
 }
 
-long StepperControlEncoder::currentPosition()
+long MovementEncoder::currentPosition()
 {
 
 
@@ -98,12 +98,12 @@ long StepperControlEncoder::currentPosition()
   }
 }
 
-long StepperControlEncoder::currentPositionRaw()
+long MovementEncoder::currentPositionRaw()
 {
     return position * encoderInvert;
 }
 
-void StepperControlEncoder::checkEncoder(bool channelA, bool channelB, bool channelAQ, bool channelBQ)
+void MovementEncoder::checkEncoder(bool channelA, bool channelB, bool channelAQ, bool channelBQ)
 {
   #if defined(BOARD_HAS_DYNAMICS_LAB_CHIP)
     processEncoder();
@@ -130,7 +130,7 @@ rotation ----------------------------------------------------->
 
 */
 
-void StepperControlEncoder::processEncoder()
+void MovementEncoder::processEncoder()
 {
   // If using farmduino, revision 1.4, use the SPI interface to read from the Motor Dynamics Lab chip
   #if defined(BOARD_HAS_DYNAMICS_LAB_CHIP)
@@ -168,7 +168,7 @@ void StepperControlEncoder::processEncoder()
 
 }
 
-void StepperControlEncoder::readChannels()
+void MovementEncoder::readChannels()
 {
 #if !defined(BOARD_HAS_DYNAMICS_LAB_CHIP) && defined(BOARD_HAS_ENCODER)
   // read the new values from the coder
@@ -200,7 +200,7 @@ void StepperControlEncoder::readChannels()
 
 }
 
-void StepperControlEncoder::setChannels(bool channelA, bool channelB, bool channelAQ, bool channelBQ)
+void MovementEncoder::setChannels(bool channelA, bool channelB, bool channelAQ, bool channelBQ)
 {
   // read the new values from the coder
 
@@ -222,7 +222,7 @@ void StepperControlEncoder::setChannels(bool channelA, bool channelB, bool chann
   }
 }
 
-void StepperControlEncoder::shiftChannels()
+void MovementEncoder::shiftChannels()
 {
 
   // Save the current enoder status to later on compare with new values

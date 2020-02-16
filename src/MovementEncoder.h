@@ -1,5 +1,5 @@
 /*
- * StepperControlEncoder.h
+ * MovementEncoder.h
  *
  *  Created on: 29 okt 2015
  *      Author: Tim Evers
@@ -17,11 +17,11 @@
 #include <stdlib.h>
 #include <SPI.h>
 
-class StepperControlEncoder
+class MovementEncoder
 {
 
 public:
-  StepperControlEncoder();
+  MovementEncoder();
 
   void loadPinNumbers(int channelA, int channelB, int channelAQ, int channelBQ);
   void loadSettings(int encType, long scaling, int invert);
