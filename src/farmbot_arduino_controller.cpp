@@ -1,14 +1,5 @@
 // Do not remove the include below
 #include "farmbot_arduino_controller.h"
-#include "pins.h"
-#include "Config.h"
-#include "Movement.h"
-#include "ServoControl.h"
-#include "PinGuard.h"
-#include "MemoryFree.h"
-#include "Debug.h"
-#include "CurrentState.h"
-#include <SPI.h>
 
 #if !defined(BOARD_HAS_TMC2130_DRIVER)
 #include "TimerOne.h"
@@ -17,6 +8,11 @@
 bool stepperInit = false;
 bool stepperFlip = false;
 
+char commandChar[INCOMING_CMD_BUF_SIZE + 1];
+//String commandString = "";
+char incomingChar = 0;
+char incomingCommandArray[INCOMING_CMD_BUF_SIZE];
+int incomingCommandPointer = 0;
 static GCodeProcessor *gCodeProcessor = new GCodeProcessor();
 
 unsigned long reportingPeriod = 5000;
@@ -26,11 +22,6 @@ bool previousEmergencyStop = false;
 unsigned long pinGuardLastCheck;
 
 int lastParamChangeNr = 0;
-
-String commandString = "";
-char incomingChar = 0;
-char incomingCommandArray[INCOMING_CMD_BUF_SIZE];
-int incomingCommandPointer = 0;
 
 // Blink led routine used for testing
 bool blink = false;
@@ -83,9 +74,190 @@ ISR(TIMER2_OVF_vect)
 }
 #endif
 
-//The setup function is called once at startup of the sketch
-void setup()
+void checkPinGuard()
 {
+ // Check PinGuards
+  if (millis() - pinGuardLastCheck >= 1000)
+  {
+    // check the pins for timeouts
+    PinGuard::getInstance()->checkPins();
+    pinGuardLastCheck = millis();
+  }
+}
+
+void periodicChecksAndReport()
+{
+  // Do periodic checks and feedback
+  if ((millis() - lastAction) > reportingPeriod)
+  {
+    // After an idle time, send the idle message
+
+    if (CurrentState::getInstance()->isEmergencyStop())
+    {
+      Serial.print(COMM_REPORT_EMERGENCY_STOP);
+      CurrentState::getInstance()->printQAndNewLine();
+
+      if (debugMessages)
+      {
+        Serial.print(COMM_REPORT_COMMENT);
+        Serial.print(" Emergency stop engaged");
+        CurrentState::getInstance()->printQAndNewLine();
+      }
+    }
+    else
+    {
+      Serial.print(COMM_REPORT_CMD_IDLE);
+      CurrentState::getInstance()->printQAndNewLine();
+    }
+
+    Movement::getInstance()->storePosition();
+    CurrentState::getInstance()->printPosition();
+
+    #if defined(BOARD_HAS_ENCODER)
+      Movement::getInstance()->reportEncoders();
+    #endif
+
+    CurrentState::getInstance()->storeEndStops();
+    CurrentState::getInstance()->printEndStops();
+
+    if (ParameterList::getInstance()->getValue(PARAM_CONFIG_OK) != 1)
+    {
+      Serial.print(COMM_REPORT_NO_CONFIG);
+      CurrentState::getInstance()->printQAndNewLine();
+    }
+
+    lastAction = millis();
+  }
+}
+
+void checkSerialInputs()
+{
+  if (Serial.available())
+  {
+    // Save current time stamp for timeout actions
+    lastAction = millis();
+
+    // Get the input and start processing on receiving 'new line'
+    incomingChar = Serial.read();
+
+    // Filter out emergency stop.
+    if (!(incomingChar == 'E' || incomingChar == 'e'))
+    {
+      incomingCommandArray[incomingCommandPointer] = incomingChar;
+      incomingCommandPointer++;
+    }
+    else
+    {
+      CurrentState::getInstance()->setEmergencyStop();
+    }
+
+    // If the string is getting to long, cap it off with a new line and let it process anyway
+    if (incomingCommandPointer >= INCOMING_CMD_BUF_SIZE - 1)
+    {
+      incomingChar = '\n';
+      incomingCommandArray[incomingCommandPointer] = incomingChar;
+      incomingCommandPointer++;
+    }
+
+    if (incomingChar == '\n' || incomingCommandPointer >= INCOMING_CMD_BUF_SIZE)
+    {
+      for (int i = 0; i < incomingCommandPointer - 1; i++)
+      {
+          commandChar[i] = incomingCommandArray[i];
+      }
+      commandChar[incomingCommandPointer-1] = '\0';
+
+      if (incomingCommandPointer > 1)
+      {
+
+        // Report back the received command
+        Serial.print(COMM_REPORT_CMD_ECHO);
+        Serial.print(" ");
+        Serial.print("*");
+        Serial.print(commandChar);
+        Serial.print("*");
+        Serial.print("\r\n");
+
+        // Create a command and let it execute
+        Command *command = new Command(commandChar);
+
+        // Log the values if needed for debugging
+        if (LOGGING || debugMessages)
+        {
+          command->print();
+        }
+
+        gCodeProcessor->execute(command);
+
+        free(command);
+
+      }
+      incomingCommandPointer = 0;
+    }
+  }
+}
+
+void checkEmergencyStop()
+{
+  // In case of emergency stop, disable movement and
+  // shut down the pins used
+  if (previousEmergencyStop == false && CurrentState::getInstance()->isEmergencyStop())
+  {
+    Movement::getInstance()->disableMotorsEmergency();
+    PinControl::getInstance()->resetPinsUsed();
+    ServoControl::getInstance()->detachServos();
+    if (debugMessages)
+    {
+      Serial.print(COMM_REPORT_COMMENT);
+      Serial.print(" Going to safe state");
+      CurrentState::getInstance()->printQAndNewLine();
+    }
+  }
+  previousEmergencyStop = CurrentState::getInstance()->isEmergencyStop();
+}
+
+void checkParamsChanged()
+{
+  // Check if parameters are changed, and if so load the new settings
+  if (lastParamChangeNr != ParameterList::getInstance()->paramChangeNumber())
+  {
+    lastParamChangeNr = ParameterList::getInstance()->paramChangeNumber();
+
+    if (debugMessages)
+    {
+      Serial.print(COMM_REPORT_COMMENT);
+      Serial.print(" loading parameters");
+      CurrentState::getInstance()->printQAndNewLine();
+    }
+
+    Movement::getInstance()->loadSettings();
+    PinGuard::getInstance()->loadConfig();
+  }
+}
+
+void checkEncoders()
+{
+  
+  #if defined(BOARD_HAS_DYNAMICS_LAB_CHIP)
+    // Check encoders out of interrupt for farmduino 1.4
+    Movement::getInstance()->checkEncoders();
+  #endif
+  
+}
+
+void startServo()
+{
+
+  Serial.print(COMM_REPORT_COMMENT);
+  Serial.print(SPACE);
+  Serial.print("Start servo");
+  Serial.print(CRLF);
+
+  ServoControl::getInstance()->attach();
+}
+
+// Set pins input output
+void setPinInputOutput(){
     //setup stepper drivers pins
     pinMode(X_STEP_PIN, OUTPUT);
     pinMode(X_DIR_PIN, OUTPUT);
@@ -213,27 +385,46 @@ void setup()
 
 #endif
 
-  //disable steppers
-  digitalWrite(X_ENABLE_PIN, HIGH);
-  digitalWrite(E_ENABLE_PIN, HIGH);
-  digitalWrite(Y_ENABLE_PIN, HIGH);
-  digitalWrite(Z_ENABLE_PIN, HIGH);
+  Serial.print(COMM_REPORT_COMMENT);
+  Serial.print(SPACE);
+  Serial.print("Set input/output");
+  Serial.print(CRLF);
+}
 
+// other initialisation functions
+void startSerial()
+{
   Serial.begin(115200);
   delay(100);
+  while (!Serial);
 
-  // Start the motor handling
-  //ServoControl::getInstance()->attach();
+  Serial.print(COMM_REPORT_COMMENT);
+  Serial.print(SPACE);
+  Serial.print("Serial connection started");
+  Serial.print(CRLF);
+}
 
-  // Load motor settings
-  Movement::getInstance()->loadSettings();
+#if defined(BOARD_HAS_TMC2130_DRIVER)
+void startupTmc()
+{
+  // Initialize the drivers
+  Serial.print(COMM_REPORT_COMMENT);
+  Serial.print(SPACE);
+  Serial.print("Init TMC2130 drivers");
+  Serial.print(CRLF);
 
-  // Dump all values to the serial interface
-  // ParameterList::getInstance()->readAllValues();
+  Movement::getInstance()->initTMC2130();
+  Movement::getInstance()->loadSettingsTMC2130(); 
+}
+#endif
 
-  // Get the settings for the pin guard
-  PinGuard::getInstance()->loadConfig();
-  pinGuardLastCheck = millis();
+void startInterrupt()
+{
+  Serial.print(COMM_REPORT_COMMENT);
+  Serial.print(SPACE);
+  Serial.print("Start interrupt");
+  Serial.print(CRLF);
+
 
   // Start the interrupt used for moving
   // Interrupt management code library written by Paul Stoffregen
@@ -248,9 +439,14 @@ void setup()
     TCCR2B = (TCCR2B & B11111000) | 0x01; // Set divider to 1
     OCR2A = 4; // Set overflow to 4 for total of 64 �s    
   #endif
+}
 
-  // Initialize the inactivity check
-  lastAction = millis();
+void homeOnBoot()
+{
+  Serial.print(COMM_REPORT_COMMENT);
+  Serial.print(SPACE);
+  Serial.print("Check homing on boot");
+  Serial.print(CRLF);
 
   if
   (
@@ -281,166 +477,148 @@ void setup()
     Serial.print("R99 HOME X ON STARTUP\r\n");
     Movement::getInstance()->moveToCoords(0, 0, 0, 0, 0, 0, true, false, false);
   }
-
-  Serial.print("R99 ARDUINO STARTUP COMPLETE\r\n");
 }
 
-char commandChar[INCOMING_CMD_BUF_SIZE + 1];
-
-
-// The loop function is called in an endless loop
-void loop()
+void startMotor()
 {
-  #if defined(BOARD_HAS_DYNAMICS_LAB_CHIP)
-    // Check encoders out of interrupt for farmduino 1.4
-    Movement::getInstance()->checkEncoders();
-  #endif
+  // Start the motor handling
+  Serial.print(COMM_REPORT_COMMENT);
+  Serial.print(SPACE);
+  Serial.print("Set motor enables off");
+  Serial.print(CRLF);
 
-  // Check PinGuards
-  if (millis() - pinGuardLastCheck >= 1000)
-  {
-    // check the pins for timeouts
-    PinGuard::getInstance()->checkPins();
-    pinGuardLastCheck = millis();
-  }
+  digitalWrite(X_ENABLE_PIN, HIGH);
+  digitalWrite(E_ENABLE_PIN, HIGH);
+  digitalWrite(Y_ENABLE_PIN, HIGH);
+  digitalWrite(Z_ENABLE_PIN, HIGH);
+}
 
-  // handle Serial
-  if (Serial.available())
-  {
-    // Save current time stamp for timeout actions
-    lastAction = millis();
+void loadMovementSetting()
+{
 
-    // Get the input and start processing on receiving 'new line'
-    incomingChar = Serial.read();
+  // Load motor settings
+  Serial.print(COMM_REPORT_COMMENT);
+  Serial.print(SPACE);
+  Serial.print("Load movement settings");
+  Serial.print(CRLF);
 
-    // Filter out emergency stop.
-    if (!(incomingChar == 'E' || incomingChar == 'e'))
-    {
-      incomingCommandArray[incomingCommandPointer] = incomingChar;
-      incomingCommandPointer++;
-    }
-    else
-    {
-      CurrentState::getInstance()->setEmergencyStop();
-    }
+  Movement::getInstance()->loadSettings();
+}
 
-    // If the string is getting to long, cap it off with a new line and let it process anyway
-    if (incomingCommandPointer >= INCOMING_CMD_BUF_SIZE - 1)
-    {
-      incomingChar = '\n';
-      incomingCommandArray[incomingCommandPointer] = incomingChar;
-      incomingCommandPointer++;
-    }
+void readParameters()
+{
+  // Dump all values to the serial interface
+  Serial.print(COMM_REPORT_COMMENT);
+  Serial.print(SPACE);
+  Serial.print("Read parameters");
+  Serial.print(CRLF);
 
-    if (incomingChar == '\n' || incomingCommandPointer >= INCOMING_CMD_BUF_SIZE)
-    {
-      for (int i = 0; i < incomingCommandPointer - 1; i++)
-      {
-          commandChar[i] = incomingCommandArray[i];
-      }
-      commandChar[incomingCommandPointer-1] = '\0';
+  ParameterList::getInstance()->readAllValues();
+}
 
-      if (incomingCommandPointer > 1)
-      {
+void startPinGuard()
+{
+  Serial.print(COMM_REPORT_COMMENT);
+  Serial.print(SPACE);
+  Serial.print("Start pin guard");
+  Serial.print(CRLF);
 
-        // Report back the received command
-        Serial.print(COMM_REPORT_CMD_ECHO);
-        Serial.print(" ");
-        Serial.print("*");
-        Serial.print(commandChar);
-        Serial.print("*");
-        Serial.print("\r\n");
+  // Get the settings for the pin guard
+  PinGuard::getInstance()->loadConfig();
 
-        // Create a command and let it execute
-        Command *command = new Command(commandChar);
+  pinGuardLastCheck = millis();
+}
 
-        // Log the values if needed for debugging
-        if (LOGGING || debugMessages)
-        {
-          command->print();
-        }
+#if defined(BOARD_HAS_TMC2130_DRIVER)
+void loadTMC2130drivers()
+{
+/*   Serial.print(COMM_REPORT_COMMENT);
+  Serial.print(SPACE);
+  Serial.print("Load TMC drivers");
+  Serial.print(CRLF);
 
-        gCodeProcessor->execute(command);
+  TMC2130Stepper controllerTMC2130_X = TMC2130Stepper(X_CHIP_SELECT);
+  TMC2130Stepper controllerTMC2130_Y = TMC2130Stepper(Y_CHIP_SELECT);
+  TMC2130Stepper controllerTMC2130_Z = TMC2130Stepper(Z_CHIP_SELECT);
+  TMC2130Stepper controllerTMC2130_E = TMC2130Stepper(E_CHIP_SELECT);
 
-        free(command);
+  TMC2130X = &controllerTMC2130_X;
+  TMC2130Y = &controllerTMC2130_Y;
+  TMC2130Z = &controllerTMC2130_Z;
+  TMC2130E = &controllerTMC2130_E;
 
-      }
-      incomingCommandPointer = 0;
-    }
-  }
+  int motorCurrentX;
+  int stallSensitivityX;
+  int microStepsX;
 
-  // In case of emergency stop, disable movement and
-  // shut down the pins used
-  if (previousEmergencyStop == false && CurrentState::getInstance()->isEmergencyStop())
-  {
-    Movement::getInstance()->disableMotorsEmergency();
-    PinControl::getInstance()->resetPinsUsed();
-    ServoControl::getInstance()->detachServos();
-    if (debugMessages)
-    {
-      Serial.print(COMM_REPORT_COMMENT);
-      Serial.print(" Going to safe state");
-      CurrentState::getInstance()->printQAndNewLine();
-    }
-  }
-  previousEmergencyStop = CurrentState::getInstance()->isEmergencyStop();
+  int motorCurrentY;
+  int stallSensitivityY;
+  int microStepsY;
 
-  // Check if parameters are changed, and if so load the new settings
-  if (lastParamChangeNr != ParameterList::getInstance()->paramChangeNumber())
-  {
-    lastParamChangeNr = ParameterList::getInstance()->paramChangeNumber();
+  int motorCurrentZ;
+  int stallSensitivityZ;
+  int microStepsZ;
 
-    if (debugMessages)
-    {
-      Serial.print(COMM_REPORT_COMMENT);
-      Serial.print(" loading parameters");
-      CurrentState::getInstance()->printQAndNewLine();
-    }
+  motorCurrentX = 600;
+  stallSensitivityX = 0;
+  microStepsX = 0;
 
-    Movement::getInstance()->loadSettings();
-    PinGuard::getInstance()->loadConfig();
-  }
+  motorCurrentY = 600;
+  stallSensitivityY = 0;
+  microStepsY = 0;
 
-  // Do periodic checks and feedback
-  if ((millis() - lastAction) > reportingPeriod)
-  {
-    // After an idle time, send the idle message
+  motorCurrentZ = 600;
+  stallSensitivityZ = 0;
+  microStepsZ = 0;
 
-    if (CurrentState::getInstance()->isEmergencyStop())
-    {
-      Serial.print(COMM_REPORT_EMERGENCY_STOP);
-      CurrentState::getInstance()->printQAndNewLine();
+  motorCurrentX = ParameterList::getInstance()->getValue(MOVEMENT_MOTOR_CURRENT_X);
+  stallSensitivityX = ParameterList::getInstance()->getValue(MOVEMENT_STALL_SENSITIVITY_X);
+  microStepsX = ParameterList::getInstance()->getValue(MOVEMENT_MICROSTEPS_X);
 
-      if (debugMessages)
-      {
-        Serial.print(COMM_REPORT_COMMENT);
-        Serial.print(" Emergency stop engaged");
-        CurrentState::getInstance()->printQAndNewLine();
-      }
-    }
-    else
-    {
-      Serial.print(COMM_REPORT_CMD_IDLE);
-      CurrentState::getInstance()->printQAndNewLine();
-    }
+  motorCurrentY = ParameterList::getInstance()->getValue(MOVEMENT_MOTOR_CURRENT_Y);
+  stallSensitivityY = ParameterList::getInstance()->getValue(MOVEMENT_STALL_SENSITIVITY_Y);
+  microStepsY = ParameterList::getInstance()->getValue(MOVEMENT_MICROSTEPS_Y);
 
-    Movement::getInstance()->storePosition();
-    CurrentState::getInstance()->printPosition();
+  motorCurrentZ = ParameterList::getInstance()->getValue(MOVEMENT_MOTOR_CURRENT_Z);
+  stallSensitivityZ = ParameterList::getInstance()->getValue(MOVEMENT_STALL_SENSITIVITY_Z);
+  microStepsX = ParameterList::getInstance()->getValue(MOVEMENT_MICROSTEPS_Z);
 
-    #if defined(BOARD_HAS_ENCODER)
-      Movement::getInstance()->reportEncoders();
-    #endif
+  TMC2130X->rms_current(motorCurrentX);   // Set the required current in mA  
+  TMC2130X->microsteps(microStepsX);      // Minimum of micro steps needed
+  TMC2130X->chm(true);                    // Set the chopper mode to classic const. off time
+  TMC2130X->diag1_stall(1);               // Activate stall diagnostics
+  TMC2130X->sgt(stallSensitivityX);       // Set stall detection sensitivity. most -64 to +64 least
+  TMC2130X->shaft_dir(0);                 // Set direction
 
-    CurrentState::getInstance()->storeEndStops();
-    CurrentState::getInstance()->printEndStops();
+  TMC2130Y->rms_current(motorCurrentX);   // Set the required current in mA  
+  TMC2130Y->microsteps(microStepsX);      // Minimum of micro steps needed
+  TMC2130Y->chm(true);                    // Set the chopper mode to classic const. off time
+  TMC2130Y->diag1_stall(1);               // Activate stall diagnostics
+  TMC2130Y->sgt(stallSensitivityX);       // Set stall detection sensitivity. most -64 to +64 least
+  TMC2130Y->shaft_dir(0);                 // Set direction
 
-    if (ParameterList::getInstance()->getValue(PARAM_CONFIG_OK) != 1)
-    {
-      Serial.print(COMM_REPORT_NO_CONFIG);
-      CurrentState::getInstance()->printQAndNewLine();
-    }
+  TMC2130Z->rms_current(motorCurrentX);   // Set the required current in mA  
+  TMC2130Z->microsteps(microStepsX);      // Minimum of micro steps needed
+  TMC2130Z->chm(true);                    // Set the chopper mode to classic const. off time
+  TMC2130Z->diag1_stall(1);               // Activate stall diagnostics
+  TMC2130Z->sgt(stallSensitivityX);       // Set stall detection sensitivity. most -64 to +64 least
+  TMC2130Z->shaft_dir(0);                 // Set direction
 
-    lastAction = millis();
-  }
+  TMC2130E->rms_current(motorCurrentX);   // Set the required current in mA  
+  TMC2130E->microsteps(microStepsX);      // Minimum of micro steps needed
+  TMC2130E->chm(true);                    // Set the chopper mode to classic const. off time
+  TMC2130E->diag1_stall(1);               // Activate stall diagnostics
+  TMC2130E->sgt(stallSensitivityX);       // Set stall detection sensitivity. most -64 to +64 least
+  TMC2130E->shaft_dir(0);                 // Set direction */
+}
 
+void loadTMC2130parameters()
+{
+}
+#endif
+
+void initLastAction()
+{
+  // Initialize the inactivity check
+  lastAction = millis();
 }

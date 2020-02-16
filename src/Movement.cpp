@@ -1268,10 +1268,10 @@ void Movement::loadMotorSettings()
   axisY.loadMotorSettings(speedMax[1], speedMin[1], speedHome[1], stepsAcc[1], timeOut[1], homeIsUp[1], motorInv[1], endStInv[1], endStInv2[1], MOVEMENT_INTERRUPT_SPEED, motor2Enbl[1], motor2Inv[1], endStEnbl[1], motorStopAtHome[1], motorMaxSize[1], motorStopAtMax[1]);
   axisZ.loadMotorSettings(speedMax[2], speedMin[2], speedHome[2], stepsAcc[2], timeOut[2], homeIsUp[2], motorInv[2], endStInv[2], endStInv2[2], MOVEMENT_INTERRUPT_SPEED, motor2Enbl[2], motor2Inv[2], endStEnbl[2], motorStopAtHome[2], motorMaxSize[2], motorStopAtMax[2]);
 
-#if defined(BOARD_HAS_TMC2130_DRIVER)
-  initTMC2130();
-  loadSettingsTMC2130();
-#endif
+// #if defined(BOARD_HAS_TMC2130_DRIVER)
+//   initTMC2130();
+//   loadSettingsTMC2130();
+// #endif
 
   primeMotors();
 }
