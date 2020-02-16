@@ -69,9 +69,13 @@ void MovementEncoder::setPosition(long newPosition)
 
       const byte reset_cmd = 0x00;
 
+      SPI.beginTransaction(SPISettings(SPI_CLOCK_DIV4, MSBFIRST, SPI_MODE0));
       digitalWrite(NSS_PIN, LOW);
+      delayMicroseconds(2);
       SPI.transfer(reset_cmd | (mdlEncoder << mdl_spi_encoder_offset));
+      delayMicroseconds(5);
       digitalWrite(NSS_PIN, HIGH);
+      SPI.endTransaction();
     }
   #elif defined(BOARD_HAS_ENCODER)
     position = newPosition;
@@ -138,9 +142,11 @@ void MovementEncoder::processEncoder()
     int readSize = 4;
     long encoderVal = 0;
 
+    SPI.beginTransaction(SPISettings(SPI_CLOCK_DIV4, MSBFIRST, SPI_MODE0));
     digitalWrite(NSS_PIN, LOW);
+    delayMicroseconds(2);
     SPI.transfer(read_cmd | (mdlEncoder << mdl_spi_encoder_offset));
-    delayMicroseconds(10);
+    delayMicroseconds(5);
 
     for (int i = 0; i < readSize; ++i)
     {
@@ -149,6 +155,7 @@ void MovementEncoder::processEncoder()
     }
 
     digitalWrite(NSS_PIN, HIGH);
+    SPI.endTransaction();
     position = encoderVal;
 
   #elif defined(BOARD_HAS_ENCODER)
@@ -229,4 +236,79 @@ void MovementEncoder::shiftChannels()
 
   prvValChannelA = curValChannelA;
   prvValChannelB = curValChannelB;
+}
+
+
+void MovementEncoder::setEnable(bool enable)
+{
+  encoderEnabled = enable;
+}
+
+void MovementEncoder::setStepDecay(float stepDecay)
+{
+  encoderStepDecay = stepDecay;
+}
+
+void MovementEncoder::setMovementDirection(bool up)
+{
+  encoderMovementUp = up;
+}
+
+float MovementEncoder::getMissedSteps()
+{
+  return missedSteps;
+}
+
+void MovementEncoder::checkMissedSteps()
+{
+  #if defined(BOARD_HAS_ENCODER)
+    if (encoderEnabled)
+    {
+      bool stepMissed = false;
+
+      // Decrease amount of missed steps if there are no missed step
+      if (missedSteps > 0)
+      {
+        (missedSteps) -= (encoderStepDecay);
+      }
+
+      // Check if the encoder goes in the wrong direction or nothing moved
+      if ((encoderMovementUp && encoderLastPosition > currentPositionRaw()) ||
+        (!encoderMovementUp && encoderLastPosition < currentPositionRaw()))
+      {
+        stepMissed = true;
+      }
+
+      if (stepMissed && missedSteps < 32000)
+      {
+        (missedSteps)++;
+      }
+
+      encoderLastPosition = currentPositionRaw();
+      //axis->setLastPosition(axis->currentPosition());
+   }
+
+  #endif
+
+/*
+  #if defined(FARMDUINO_EXP_V20) || defined(FARMDUINO_V30)
+
+    if (encoderEnabled) {
+      if (axis->stallDetected()) {
+        // In case of stall detection, count this as a missed step
+        (*missedSteps)++;
+        //axis->setCurrentPosition(*lastPosition);
+      }
+      else {
+        // Decrease amount of missed steps if there are no missed step
+        if (missedSteps > 0)
+        {
+          (missedSteps) -= (encoderStepDecay);
+        }
+        setPosition(axis->currentPosition());
+        //axis->setLastPosition(axis->currentPosition());
+      }
+    }
+  #endif
+*/
 }

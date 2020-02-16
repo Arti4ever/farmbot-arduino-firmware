@@ -9,6 +9,8 @@
 #ifndef CONFIG_H_
 #define CONFIG_H_
 
+  const char SOFTWARE_VERSION[] = "6.5.8\0";
+
   const int LOGGING = 0;
 
   const int INCOMING_CMD_BUF_SIZE = 100;
@@ -77,8 +79,8 @@
   const long MOVEMENT_TIMEOUT_Y_DEFAULT = 120;
   const long MOVEMENT_TIMEOUT_Z_DEFAULT = 120;
 
-  const long MOVEMENT_KEEP_ACTIVE_X_DEFAULT = 1;
-  const long MOVEMENT_KEEP_ACTIVE_Y_DEFAULT = 1;
+  const long MOVEMENT_KEEP_ACTIVE_X_DEFAULT = 0;
+  const long MOVEMENT_KEEP_ACTIVE_Y_DEFAULT = 0;
   const long MOVEMENT_KEEP_ACTIVE_Z_DEFAULT = 1;
 
   const long MOVEMENT_HOME_AT_BOOT_X_DEFAULT = 0;
@@ -224,7 +226,6 @@
 
   const long STATUS_GENERAL_DEFAULT = 0;
 
-//const char SOFTWARE_VERSION[] = "4.0.2\0";
 
 #if defined(BOARD_HAS_DYNAMICS_LAB_CHIP)
 static const int mdl_spi_encoder_offset = 4;
@@ -239,23 +240,33 @@ enum MdlSpiEncoders
 
 #endif /* CONFIG_H_ */
 
-#if defined(RAMPS_V14) && !defined(SOFTWARE_VERSION)
-#define SOFTWARE_VERSION "6.4.2.R\0"
+#if defined(RAMPS_V14) && !defined(SOFTWARE_VERSION_SUFFIX)
+#define SOFTWARE_VERSION_SUFFIX ".R.genesisK12\0"
 #endif
 
-#if defined(FARMDUINO_V10) && !defined(SOFTWARE_VERSION)
-#define SOFTWARE_VERSION "6.4.2.F\0"
+#if defined(FARMDUINO_V10) && !defined(SOFTWARE_VERSION_SUFFIX)
+#define SOFTWARE_VERSION_SUFFIX ".F.genesisK13\0"
 #endif
 
-#if defined(FARMDUINO_V14) && !defined(SOFTWARE_VERSION)
-#define SOFTWARE_VERSION "6.4.2.G\0"
+#if defined(FARMDUINO_V14) && !defined(SOFTWARE_VERSION_SUFFIX)
+#define SOFTWARE_VERSION_SUFFIX ".G.genesisK14\0"
 #endif
 
-#if defined(FARMDUINO_EXP_V20) && !defined(SOFTWARE_VERSION)
-#define SOFTWARE_VERSION "6.4.2.E\0"
+#if defined(FARMDUINO_V30) && !defined(SOFTWARE_VERSION_SUFFIX)
+#define SOFTWARE_VERSION_SUFFIX ".H.genesisK15\0"
 #endif
 
-#if defined(FYSETC_F6) && !defined(SOFTWARE_VERSION)
-#define SOFTWARE_VERSION "6.4.2.E\0"
+#if defined(FARMDUINO_EXP_V20) && !defined(SOFTWARE_VERSION_SUFFIX)
+#define SOFTWARE_VERSION_SUFFIX ".E.expressK10\0"
+#endif
+
+#if defined(FYSETC_F6) && !defined(SOFTWARE_VERSION_SUFFIX)
+#define SOFTWARE_VERSION_SUFFIX ".E.expressK10\0"
+#endif
+
+#ifndef FARMBOT_BOARD_ID
+#define SOFTWARE_COMMIT ""
+#else
+#include "CommitSHA.h"
 #endif
 

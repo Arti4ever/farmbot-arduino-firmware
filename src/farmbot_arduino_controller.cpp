@@ -245,16 +245,6 @@ void checkEncoders()
   
 }
 
-void startServo()
-{
-
-  Serial.print(COMM_REPORT_COMMENT);
-  Serial.print(SPACE);
-  Serial.print("Start servo");
-  Serial.print(CRLF);
-
-  ServoControl::getInstance()->attach();
-}
 
 // Set pins input output
 void setPinInputOutput(){
@@ -404,27 +394,12 @@ void startSerial()
   Serial.print(CRLF);
 }
 
-#if defined(BOARD_HAS_TMC2130_DRIVER)
-void startupTmc()
-{
-  // Initialize the drivers
-  Serial.print(COMM_REPORT_COMMENT);
-  Serial.print(SPACE);
-  Serial.print("Init TMC2130 drivers");
-  Serial.print(CRLF);
-
-  Movement::getInstance()->initTMC2130();
-  Movement::getInstance()->loadSettingsTMC2130(); 
-}
-#endif
-
 void startInterrupt()
 {
   Serial.print(COMM_REPORT_COMMENT);
   Serial.print(SPACE);
   Serial.print("Start interrupt");
   Serial.print(CRLF);
-
 
   // Start the interrupt used for moving
   // Interrupt management code library written by Paul Stoffregen
@@ -529,91 +504,47 @@ void startPinGuard()
   pinGuardLastCheck = millis();
 }
 
+void startServo()
+{
+
+  Serial.print(COMM_REPORT_COMMENT);
+  Serial.print(SPACE);
+  Serial.print("Start servo");
+  Serial.print(CRLF);
+
+  ServoControl::getInstance()->attach();
+}
+
 #if defined(BOARD_HAS_TMC2130_DRIVER)
 void loadTMC2130drivers()
 {
-/*   Serial.print(COMM_REPORT_COMMENT);
+  Serial.print(COMM_REPORT_COMMENT);
   Serial.print(SPACE);
   Serial.print("Load TMC drivers");
   Serial.print(CRLF);
-
-  TMC2130Stepper controllerTMC2130_X = TMC2130Stepper(X_CHIP_SELECT);
-  TMC2130Stepper controllerTMC2130_Y = TMC2130Stepper(Y_CHIP_SELECT);
-  TMC2130Stepper controllerTMC2130_Z = TMC2130Stepper(Z_CHIP_SELECT);
-  TMC2130Stepper controllerTMC2130_E = TMC2130Stepper(E_CHIP_SELECT);
-
-  TMC2130X = &controllerTMC2130_X;
-  TMC2130Y = &controllerTMC2130_Y;
-  TMC2130Z = &controllerTMC2130_Z;
-  TMC2130E = &controllerTMC2130_E;
-
-  int motorCurrentX;
-  int stallSensitivityX;
-  int microStepsX;
-
-  int motorCurrentY;
-  int stallSensitivityY;
-  int microStepsY;
-
-  int motorCurrentZ;
-  int stallSensitivityZ;
-  int microStepsZ;
-
-  motorCurrentX = 600;
-  stallSensitivityX = 0;
-  microStepsX = 0;
-
-  motorCurrentY = 600;
-  stallSensitivityY = 0;
-  microStepsY = 0;
-
-  motorCurrentZ = 600;
-  stallSensitivityZ = 0;
-  microStepsZ = 0;
-
-  motorCurrentX = ParameterList::getInstance()->getValue(MOVEMENT_MOTOR_CURRENT_X);
-  stallSensitivityX = ParameterList::getInstance()->getValue(MOVEMENT_STALL_SENSITIVITY_X);
-  microStepsX = ParameterList::getInstance()->getValue(MOVEMENT_MICROSTEPS_X);
-
-  motorCurrentY = ParameterList::getInstance()->getValue(MOVEMENT_MOTOR_CURRENT_Y);
-  stallSensitivityY = ParameterList::getInstance()->getValue(MOVEMENT_STALL_SENSITIVITY_Y);
-  microStepsY = ParameterList::getInstance()->getValue(MOVEMENT_MICROSTEPS_Y);
-
-  motorCurrentZ = ParameterList::getInstance()->getValue(MOVEMENT_MOTOR_CURRENT_Z);
-  stallSensitivityZ = ParameterList::getInstance()->getValue(MOVEMENT_STALL_SENSITIVITY_Z);
-  microStepsX = ParameterList::getInstance()->getValue(MOVEMENT_MICROSTEPS_Z);
-
-  TMC2130X->rms_current(motorCurrentX);   // Set the required current in mA  
-  TMC2130X->microsteps(microStepsX);      // Minimum of micro steps needed
-  TMC2130X->chm(true);                    // Set the chopper mode to classic const. off time
-  TMC2130X->diag1_stall(1);               // Activate stall diagnostics
-  TMC2130X->sgt(stallSensitivityX);       // Set stall detection sensitivity. most -64 to +64 least
-  TMC2130X->shaft_dir(0);                 // Set direction
-
-  TMC2130Y->rms_current(motorCurrentX);   // Set the required current in mA  
-  TMC2130Y->microsteps(microStepsX);      // Minimum of micro steps needed
-  TMC2130Y->chm(true);                    // Set the chopper mode to classic const. off time
-  TMC2130Y->diag1_stall(1);               // Activate stall diagnostics
-  TMC2130Y->sgt(stallSensitivityX);       // Set stall detection sensitivity. most -64 to +64 least
-  TMC2130Y->shaft_dir(0);                 // Set direction
-
-  TMC2130Z->rms_current(motorCurrentX);   // Set the required current in mA  
-  TMC2130Z->microsteps(microStepsX);      // Minimum of micro steps needed
-  TMC2130Z->chm(true);                    // Set the chopper mode to classic const. off time
-  TMC2130Z->diag1_stall(1);               // Activate stall diagnostics
-  TMC2130Z->sgt(stallSensitivityX);       // Set stall detection sensitivity. most -64 to +64 least
-  TMC2130Z->shaft_dir(0);                 // Set direction
-
-  TMC2130E->rms_current(motorCurrentX);   // Set the required current in mA  
-  TMC2130E->microsteps(microStepsX);      // Minimum of micro steps needed
-  TMC2130E->chm(true);                    // Set the chopper mode to classic const. off time
-  TMC2130E->diag1_stall(1);               // Activate stall diagnostics
-  TMC2130E->sgt(stallSensitivityX);       // Set stall detection sensitivity. most -64 to +64 least
-  TMC2130E->shaft_dir(0);                 // Set direction */
 }
 
 void loadTMC2130parameters()
 {
+  // Initialize the drivers
+  Serial.print(COMM_REPORT_COMMENT);
+  Serial.print(SPACE);
+  Serial.print("Load TMC2130 parameters");
+  Serial.print(CRLF);
+
+  Movement::getInstance()->loadSettingsTMC2130();
+}
+
+void startupTmc()
+{
+
+  // Initialize the drivers
+  Serial.print(COMM_REPORT_COMMENT);
+  Serial.print(SPACE);
+  Serial.print("Init TMC2130 drivers");
+  Serial.print(CRLF);
+
+  Movement::getInstance()->initTMC2130();
 }
 #endif
 
@@ -621,4 +552,19 @@ void initLastAction()
 {
   // Initialize the inactivity check
   lastAction = millis();
+}
+
+void setupTestForDebug()
+{
+
+  Serial.print(COMM_REPORT_COMMENT);
+  Serial.print(SPACE);
+  Serial.print("Setup Debug");
+  Serial.print(CRLF);
+
+}
+
+void runTestForDebug()
+{
+
 }

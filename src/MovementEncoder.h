@@ -5,8 +5,8 @@
  *      Author: Tim Evers
  */
 
-#ifndef STEPPERCONTROLENCODER_H_
-#define STEPPERCONTROLENCODER_H_
+#ifndef MovementENCODER_H_
+#define MovementENCODER_H_
 
 #include "Arduino.h"
 //#include "CurrentState.h"
@@ -41,30 +41,44 @@ public:
   void setChannels(bool channelA, bool channelB, bool channelAQ, bool channelBQ);
   void shiftChannels();
 
+  void setMovementDirection(bool up);
+  void setEnable(bool enable);
+  void setStepDecay(float stepDecay);
+  float getMissedSteps();
+
+  void checkMissedSteps();
+
 private:
   // pin settings
-  int pinChannelA;
-  int pinChannelAQ;
-  int pinChannelB;
-  int pinChannelBQ;
+  int pinChannelA = 0;
+  int pinChannelAQ = 0;
+  int pinChannelB = 0;
+  int pinChannelBQ = 0;
 
   // channels
-  bool prvValChannelA;
-  bool prvValChannelB;
-  bool curValChannelA;
-  bool curValChannelB;
+  bool prvValChannelA = false;
+  bool prvValChannelB = false;
+  bool curValChannelA = false;
+  bool curValChannelB = false;
 
-  bool readChannelA;
-  bool readChannelAQ;
-  bool readChannelB;
-  bool readChannelBQ;
+  bool readChannelA = false;
+  bool readChannelAQ = false;
+  bool readChannelB = false;
+  bool readChannelBQ = false;
 
   // encoder
-  long position;
-  long scalingFactor;
-  float floatScalingFactor;
-  int encoderType;
-  int encoderInvert;
+  long position = 0;
+  long scalingFactor = 0;
+  float floatScalingFactor = 0;
+  int encoderType = 0;
+  int encoderInvert = 0;
+
+
+  float missedSteps = 0;
+  long encoderLastPosition = 0;
+  float encoderStepDecay = 0;
+  bool encoderEnabled = false;
+  bool encoderMovementUp = false;
 
 #if defined(BOARD_HAS_DYNAMICS_LAB_CHIP)
   MdlSpiEncoders mdlEncoder = _MDL_X1;
@@ -72,4 +86,4 @@ private:
 
 };
 
-#endif /* STEPPERCONTROLENCODER_H_ */
+#endif /* MovementENCODER_H_ */

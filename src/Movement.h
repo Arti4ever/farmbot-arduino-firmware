@@ -120,7 +120,7 @@ private:
   bool endStInv[3] = { false, false, false };
   bool endStInv2[3] = { false, false, false };
   bool endStEnbl[3] = { false, false, false };
-  long timeOut[3] = { 0, 0, 0 };
+  unsigned long timeOut[3] = { 0, 0, 0 };
   long stepsPerMm[3] = { 1, 1, 1 };
 
   float motorConsMissedSteps[3] = { 0, 0, 0 };
@@ -142,4 +142,4 @@ private:
 
 };
 
-#endif /* STEPPERCONTROL_H_ */
+#endif /* MOVEMENT_H_ */

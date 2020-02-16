@@ -11,6 +11,7 @@ void setup()
 {
   startSerial();
   setPinInputOutput();
+
   readParameters();
 
 #if defined(BOARD_HAS_TMC2130_DRIVER)
@@ -22,16 +23,17 @@ void setup()
   loadMovementSetting();
   startMotor();
   startPinGuard();
-  startServo();
+  //startServo();
   startInterrupt();
   initLastAction();
   homeOnBoot();
+
+  //setupTestForDebug();
 
   Serial.print(COMM_REPORT_COMMENT);
   Serial.print(SPACE);
   Serial.print("ARDUINO STARTUP COMPLETE");
   Serial.print(CRLF);
-
 }
 
 // the loop function runs over and over again until power down or reset

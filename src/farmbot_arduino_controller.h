@@ -17,7 +17,7 @@
 
 #include "TMCStepper.h"
 
-/**/
+
 #include "Movement.h"
 #include "ServoControl.h"
 #include "PinGuard.h"
@@ -44,6 +44,7 @@
   void startServo();
   void startInterrupt();
   void homeOnBoot();
+  void setupTestForDebug();
   void runTestForDebug();
   void checkEncoders();
   void checkPinGuard();
