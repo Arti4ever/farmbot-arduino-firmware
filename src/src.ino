@@ -15,9 +15,7 @@ void setup()
   readParameters();
 
 #if defined(BOARD_HAS_TMC2130_DRIVER)
-  loadTMC2130drivers();
   startupTmc();
-  loadTMC2130parameters();
 #endif
 
   loadMovementSetting();

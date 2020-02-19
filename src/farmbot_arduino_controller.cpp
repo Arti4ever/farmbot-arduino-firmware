@@ -516,28 +516,8 @@ void startServo()
 }
 
 #if defined(BOARD_HAS_TMC2130_DRIVER)
-void loadTMC2130drivers()
-{
-  Serial.print(COMM_REPORT_COMMENT);
-  Serial.print(SPACE);
-  Serial.print("Load TMC drivers");
-  Serial.print(CRLF);
-}
-
-void loadTMC2130parameters()
-{
-  // Initialize the drivers
-  Serial.print(COMM_REPORT_COMMENT);
-  Serial.print(SPACE);
-  Serial.print("Load TMC2130 parameters");
-  Serial.print(CRLF);
-
-  Movement::getInstance()->loadSettingsTMC2130();
-}
-
 void startupTmc()
 {
-
   // Initialize the drivers
   Serial.print(COMM_REPORT_COMMENT);
   Serial.print(SPACE);
