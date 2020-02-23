@@ -14,10 +14,6 @@ void setup()
 
   readParameters();
 
-#if defined(BOARD_HAS_TMC2130_DRIVER)
-  startupTmc();
-#endif
-
   loadMovementSetting();
   startMotor();
   startPinGuard();
