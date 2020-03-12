@@ -754,7 +754,7 @@ void MovementAxis::setMotorStep()
 
     digitalWrite(pinStep, HIGH);
 
-  if (pin2Enable)
+  if (motorMotor2Enl)
   {
     digitalWrite(pin2Step, HIGH);
   }
@@ -767,7 +767,7 @@ void MovementAxis::resetMotorStep()
 
   digitalWrite(pinStep, LOW);
 
-  if (pin2Enable)
+  if (motorMotor2Enl)
   {
     digitalWrite(pin2Step, LOW);
   }
