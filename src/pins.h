@@ -389,77 +389,89 @@
 
 #if defined(FYSETC_F6)
 
-    // X1-AXIS
-  #define X_STEP_PIN 54     // X1_STEP_PIN
-  #define X_DIR_PIN 55      // X1_DIR_PIN
-  #define X_ENABLE_PIN 38   // X1_ENABLE_PIN
-  #define X_CHIP_SELECT 70  // X1_CHIP_SELECT
-  #define X_MIN_PIN 63
-  #define X_MAX_PIN 64
+  // X1-AXIS
+  #define X_STEP_PIN        54
+  #define X_DIR_PIN         55
+  #define X_ENABLE_PIN      38
+  #define X_CHIP_SELECT     70
+  #define X_MIN_PIN         63
+  #define X_MAX_PIN         64
 
-    // X2-AXIS
-  #define E_STEP_PIN 26     // X2_STEP_PIN
-  #define E_DIR_PIN 28      // X2_DIR_PIN
-  #define E_ENABLE_PIN 24   // X2_ENABLE_PIN
-  #define E_CHIP_SELECT 47  // X2_CHIP_SELECT
+  // X2-AXIS
+  #define E_STEP_PIN        26
+  #define E_DIR_PIN         28
+  #define E_ENABLE_PIN      24
+  #define E_CHIP_SELECT     47
 
-    // Y-AXIS
-  #define Y_STEP_PIN 60
-  #define Y_DIR_PIN 61
-  #define Y_ENABLE_PIN 56
-  #define Y_CHIP_SELECT 39  // Y_CHIP_SELECT
-  #define Y_MIN_PIN 14
-  #define Y_MAX_PIN 15
+  // Y-AXIS
+  #define Y_STEP_PIN        60
+  #define Y_DIR_PIN         61
+  #define Y_ENABLE_PIN      56
+  #define Y_CHIP_SELECT     39
+  #define Y_MIN_PIN         14
+  #define Y_MAX_PIN         15
 
-    // Z-AXIS
-  #define Z_STEP_PIN 43
-  #define Z_DIR_PIN 48
-  #define Z_ENABLE_PIN 58
-  #define Z_CHIP_SELECT 74  // Z_CHIP_SELECT
-  #define Z_MIN_PIN 12
-  #define Z_MAX_PIN 9
+  // Z-AXIS
+  #define Z_STEP_PIN        43
+  #define Z_DIR_PIN         48
+  #define Z_ENABLE_PIN      58
+  #define Z_CHIP_SELECT     74
+  #define Z_MIN_PIN         12
+  #define Z_MAX_PIN         9
 
-    // UTM (EXP1)
-  #define UTM_C 29 // TOOL VERIFICATION
-  #define UTM_D 68 // SOIL SENSOR TE2
-  #define UTM_E 25
-  #define UTM_F 23
-  #define UTM_G 16
-  #define UTM_H 17
-  #define UTM_I 35
-  #define UTM_J 37
-  #define UTM_K -1
-  #define UTM_L -1
+  // UTM (EXP1)
+/*
+ *          -----
+ *      5V | · · | GND
+ *     D29 | · · | D27
+ *     D25  ]· · | D23
+ *     D16 | · · | D17
+ *     D35 | · · | D37
+ *          -----
+ *           EXP1
+ */
+  #define UTM_C             29 // (D29) TOOL VERIFICATION
+  #define UTM_D             68 // (A12) SOIL SENSOR
+  #define UTM_E             27 // (D27)
+  #define UTM_F             25 // (D25)
+  #define UTM_G             23 // (D23)
+  #define UTM_H             16 // (D16)
+  #define UTM_I             17 // (D17)
+  #define UTM_J             35 // (D35)
+  #define UTM_K             37 // (D37)
+  #define UTM_L             -1
 
-  #define LED_PIN 13
+  #define LED_PIN           13
 
-    // Peripherals
-  #define LIGHTING_PIN 5
-  #define WATER_PIN 6
-  #define VACUUM_PIN 7
-  #define PERIPHERAL_4_PIN 8
-  #define PERIPHERAL_5_PIN 44
-  #define PERIPHERAL_6_PIN 45
-  #define PERIPHERAL_7_PIN 46
+  // Peripherals
+  #define LIGHTING_PIN      5
+  #define WATER_PIN         6
+  #define VACUUM_PIN        7
+  #define PERIPHERAL_4_PIN  8
+  #define PERIPHERAL_5_PIN  44
+  #define PERIPHERAL_6_PIN  45
+  #define PERIPHERAL_7_PIN  46
 
-    // Auxiliary motors
-  #define AUX_STEP_PIN    36
-  #define AUX_DIR_PIN     34
-  #define AUX_ENABLE_PIN  30
-  #define AUX_CHIP_SELECT 32
+  // Auxiliary motors
+  #define AUX_STEP_PIN      36
+  #define AUX_DIR_PIN       34
+  #define AUX_ENABLE_PIN    30
+  #define AUX_CHIP_SELECT   32
 
   #define AUX_2_STEP_PIN    59
   #define AUX_2_DIR_PIN     57
   #define AUX_2_ENABLE_PIN  40
   #define AUX_2_CHIP_SELECT 42
-
-  #define SERVO_0_PIN 13
-  #define SERVO_1_PIN 11
-  #define SERVO_2_PIN 10
-  #define SERVO_3_PIN 4
-
-  #define RGB_LED_R_PIN    3
-  #define RGB_LED_G_PIN    4
-  #define RGB_LED_B_PIN    9
+  
+  // Servos
+  #define SERVO_0_PIN       13
+  #define SERVO_1_PIN       11
+  #define SERVO_2_PIN       10
+  #define SERVO_3_PIN       4
+  
+  // Other
+  #define RGB_LED_R_PIN     3
+  #define RGB_LED_G_PIN     4
+  #define RGB_LED_B_PIN     9
 
 #endif
