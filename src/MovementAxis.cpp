@@ -328,14 +328,16 @@ void MovementAxis::checkMovement()
       (
           (coordDestinationPoint > coordSourcePoint && coordCurrentPoint < coordDestinationPoint) ||
           (coordDestinationPoint < coordSourcePoint && coordCurrentPoint > coordDestinationPoint) ||
-          coordHomeAxis) &&
-      axisActive)
+          coordHomeAxis))
   {
 
     // home or destination not reached, keep moving
     // Get the axis speed, in steps per second
     axisSpeed = calculateSpeed(coordSourcePoint, coordCurrentPoint, coordDestinationPoint,
                                 motorSpeedMin, motorSpeedMax, motorStepsAcc);
+
+    axisActive = true;
+
   }
   else
   {
@@ -554,7 +556,6 @@ bool MovementAxis::loadCoordinates(long sourcePoint, long destinationPoint, bool
 
   // Initialize movement variables
   moveTicks = 0;
-  axisActive = true;
 
   return changed;
 }
