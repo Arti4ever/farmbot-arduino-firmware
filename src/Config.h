@@ -261,7 +261,7 @@ enum MdlSpiEncoders
 #endif
 
 #if defined(FYSETC_F6) && !defined(SOFTWARE_VERSION_SUFFIX)
-#define SOFTWARE_VERSION_SUFFIX ".E.expressK10\0"
+#define SOFTWARE_VERSION_SUFFIX ".H.genesisK15\0"
 #endif
 
 #ifndef FARMBOT_BOARD_ID

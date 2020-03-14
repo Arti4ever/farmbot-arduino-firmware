@@ -431,7 +431,7 @@
  *           EXP1
  */
   #define UTM_C             29 // (D29) TOOL VERIFICATION
-  #define UTM_D             68 // (A12) SOIL SENSOR
+  #define UTM_D             66 // (A12) SOIL SENSOR
   #define UTM_E             27 // (D27)
   #define UTM_F             25 // (D25)
   #define UTM_G             23 // (D23)
