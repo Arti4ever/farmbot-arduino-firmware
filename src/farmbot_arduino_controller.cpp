@@ -548,3 +548,9 @@ void runTestForDebug()
 {
 
 }
+
+void checkMotorsInactivity()
+{
+  //if we do not move since 5min, then disable motors
+  Movement::getInstance()->checkInactivity();
+}

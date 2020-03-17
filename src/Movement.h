@@ -61,6 +61,8 @@ public:
   void reportEncoders();
   void getEncoderReport();
 
+  void checkInactivity();
+
 	unsigned long i1 = 0;
 	unsigned long i2 = 0;
   unsigned long i3 = 0;
@@ -140,6 +142,7 @@ private:
   int axisServicedNext = 0;
   bool motorMotorsEnabled = false;
 
+  unsigned long lastmoveTime = 0;
 };
 
 #endif /* MOVEMENT_H_ */

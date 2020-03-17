@@ -53,6 +53,7 @@
   void checkParamsChanged();
   void periodicChecksAndReport();
   void initLastAction();
+  void checkMotorsInactivity();
 
 
 //Do not add code below this line

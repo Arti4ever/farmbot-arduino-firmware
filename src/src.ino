@@ -41,5 +41,6 @@ void loop()
   checkEmergencyStop();
   checkParamsChanged();
   periodicChecksAndReport();
+  checkMotorsInactivity();
 
 }

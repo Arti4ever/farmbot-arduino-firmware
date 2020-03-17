@@ -481,6 +481,7 @@ int Movement::moveToCoords(double xDestScaled, double yDestScaled, double zDestS
       serialBuffer += "R99 timeout Z axis\r\n";
       error = ERR_TIMEOUT;
     }
+    lastmoveTime = millis();
 
     // Check if there is an emergency stop command
     if (Serial.available() > 0)
@@ -604,8 +605,6 @@ int Movement::moveToCoords(double xDestScaled, double yDestScaled, double zDestS
   reportStatus(&axisX, axisSubStep[0]);
   reportStatus(&axisY, axisSubStep[1]);
   reportStatus(&axisZ, axisSubStep[2]);
-
-  disableMotors();
 
   // Report end statuses
   storePosition();
@@ -789,6 +788,7 @@ int Movement::calibrateAxis(int axis)
 
   // Move towards home
   calibAxis->enableMotor();
+  lastmoveTime = millis();
   
   /**/
   //calibAxis->setDirectionHome();
@@ -852,6 +852,7 @@ int Movement::calibrateAxis(int axis)
         return error;
       }
     }
+    lastmoveTime = millis();
 
     // Check if there is an emergency stop command
     if (Serial.available() > 0)
@@ -1441,6 +1442,7 @@ void Movement::enableMotors()
   axisX.enableMotor();
   axisY.enableMotor();
   axisZ.enableMotor();
+  lastmoveTime = millis();
 
   delay(100);
 }
@@ -1608,3 +1610,13 @@ void Movement::checkEncoders()
     ENC_Z_B_Q_PORT & ENC_Z_B_Q_BYTE);
 }
 #endif
+
+void Movement::checkInactivity(void)
+{
+  if((millis() - lastmoveTime) > (timeOut[0] * 1000))
+    if (motorKeepActive[0] == 0) { axisX.disableMotor(); }
+  if((millis() - lastmoveTime) > (timeOut[1] * 1000))
+    if (motorKeepActive[1] == 0) { axisY.disableMotor(); }
+  if((millis() - lastmoveTime) > (timeOut[2] * 1000))
+    if (motorKeepActive[2] == 0) { axisZ.disableMotor(); }
+}
