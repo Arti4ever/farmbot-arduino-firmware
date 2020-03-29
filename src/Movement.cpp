@@ -354,21 +354,21 @@ int Movement::moveToCoords(double xDestScaled, double yDestScaled, double zDestS
     checkAxisSubStatus(&axisY, &axisSubStep[1]);
     checkAxisSubStatus(&axisZ, &axisSubStep[2]);
 
-    if (axisX.isStepDone())
+    if (axisX.isAxisActive() && axisX.isStepDone())
     {
       axisX.checkMovement();
       checkAxisVsEncoder(&axisX, &encoderX, &motorConsMissedSteps[0], &motorLastPosition[0], &motorConsEncoderLastPosition[0], &motorConsEncoderUseForPos[0], &motorConsMissedStepsDecay[0], &motorConsEncoderEnabled[0]);
       axisX.resetStepDone();
     }
 
-    if (axisY.isStepDone())
+    if (axisY.isAxisActive() && axisY.isStepDone())
     {
       axisY.checkMovement();
       checkAxisVsEncoder(&axisY, &encoderY, &motorConsMissedSteps[1], &motorLastPosition[1], &motorConsEncoderLastPosition[1], &motorConsEncoderUseForPos[1], &motorConsMissedStepsDecay[1], &motorConsEncoderEnabled[1]);
       axisY.resetStepDone();
     }
 
-    if (axisZ.isStepDone())
+    if (axisZ.isAxisActive() && axisZ.isStepDone())
     {
       axisZ.checkMovement();
       checkAxisVsEncoder(&axisZ, &encoderZ, &motorConsMissedSteps[2], &motorLastPosition[2], &motorConsEncoderLastPosition[2], &motorConsEncoderUseForPos[2], &motorConsMissedStepsDecay[2], &motorConsEncoderEnabled[2]);
