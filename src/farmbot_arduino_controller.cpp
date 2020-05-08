@@ -1,9 +1,7 @@
 // Do not remove the include below
 #include "farmbot_arduino_controller.h"
 
-#if !defined(BOARD_HAS_TMC2130_DRIVER)
 #include "TimerOne.h"
-#endif
 
 bool stepperInit = false;
 bool stepperFlip = false;
@@ -45,7 +43,6 @@ unsigned long interruptDurationMax = 0;
 bool interruptBusy = false;
 int interruptSecondTimer = 0;
 
-#if !defined(BOARD_HAS_TMC2130_DRIVER)
 void interrupt(void)
 {
   if (!debugInterrupt)
@@ -62,17 +59,6 @@ void interrupt(void)
     }
   }
 }
-#else
-ISR(TIMER2_OVF_vect) 
-{
-  if (interruptBusy == false)
-  {
-    interruptBusy = true;
-    Movement::getInstance()->handleMovementInterrupt();
-    interruptBusy = false;
-  }
-}
-#endif
 
 void checkPinGuard()
 {
@@ -405,15 +391,9 @@ void startInterrupt()
   // Interrupt management code library written by Paul Stoffregen
   // The default time 100 micro seconds
 
-  #if !defined(BOARD_HAS_TMC2130_DRIVER)
-    Timer1.attachInterrupt(interrupt);
-    Timer1.initialize(MOVEMENT_INTERRUPT_SPEED);
-    Timer1.start();
-  #else
-    TIMSK2 = (TIMSK2 & B11111110) | 0x01; // Enable timer overflow
-    TCCR2B = (TCCR2B & B11111000) | 0x01; // Set divider to 1
-    OCR2A = 4; // Set overflow to 4 for total of 64 �s    
-  #endif
+  Timer1.attachInterrupt(interrupt);
+  Timer1.initialize(MOVEMENT_INTERRUPT_SPEED);
+  Timer1.start();
 }
 
 void homeOnBoot()
