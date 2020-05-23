@@ -205,17 +205,17 @@ void Movement::loadSettings()
     int microSteps;
 
     motorCurrent = ParameterList::getInstance()->getValue(MOVEMENT_MOTOR_CURRENT_X);
-    stallSensitivity = ParameterList::getInstance()->getValue(MOVEMENT_STALL_SENSITIVITY_X);
+    stallSensitivity = ParameterList::getInstance()->getValue(ENCODER_MISSED_STEPS_DECAY_X); //MOVEMENT_STALL_SENSITIVITY_X
     microSteps = ParameterList::getInstance()->getValue(MOVEMENT_MICROSTEPS_X);
     axisX.loadSettingsTMC2130(motorCurrent, stallSensitivity, microSteps);
 
     motorCurrent = ParameterList::getInstance()->getValue(MOVEMENT_MOTOR_CURRENT_Y);
-    stallSensitivity = ParameterList::getInstance()->getValue(MOVEMENT_STALL_SENSITIVITY_Y);
+    stallSensitivity = ParameterList::getInstance()->getValue(ENCODER_MISSED_STEPS_DECAY_Y); //MOVEMENT_STALL_SENSITIVITY_Y
     microSteps = ParameterList::getInstance()->getValue(MOVEMENT_MICROSTEPS_Y);
     axisY.loadSettingsTMC2130(motorCurrent, stallSensitivity, microSteps);
 
     motorCurrent = ParameterList::getInstance()->getValue(MOVEMENT_MOTOR_CURRENT_Z);
-    stallSensitivity = ParameterList::getInstance()->getValue(MOVEMENT_STALL_SENSITIVITY_Z);
+    stallSensitivity = ParameterList::getInstance()->getValue(ENCODER_MISSED_STEPS_DECAY_Z); //OVEMENT_STALL_SENSITIVITY_Z
     microSteps = ParameterList::getInstance()->getValue(MOVEMENT_MICROSTEPS_Z);
     axisZ.loadSettingsTMC2130(motorCurrent, stallSensitivity, microSteps);
   }
