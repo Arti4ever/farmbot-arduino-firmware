@@ -533,10 +533,16 @@ int Movement::moveToCoords(double xDestScaled, double yDestScaled, double zDestS
         case 2:
           #if defined(BOARD_HAS_TMC2130_DRIVER)
             serialBuffer += "R89";
+            serialBuffer += " U";
+            serialBuffer += 0;
             serialBuffer += " X";
             serialBuffer += axisX.getLoad();
+            serialBuffer += " V";
+            serialBuffer += 0;
             serialBuffer += " Y";
             serialBuffer += axisY.getLoad();
+            serialBuffer += " W";
+            serialBuffer += 0;
             serialBuffer += " Z";
             serialBuffer += axisZ.getLoad();
             serialBuffer += CurrentState::getInstance()->getQAndNewLine();
