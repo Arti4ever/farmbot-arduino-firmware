@@ -154,7 +154,7 @@ bool MovementAxis::stallDetected() {
 }
 
 uint16_t MovementAxis::getLoad() {
-  return TMC2130A->sg_result();
+  return (100 - (TMC2130A->sg_result()*100/1023));
 }
 
 #endif
